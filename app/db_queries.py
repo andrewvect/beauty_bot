@@ -14,6 +14,7 @@ def get_area_name_by_id(area_id):
 
 
 def add_new_city(name):
+    name = name.lower()
     session = Session()
     new_city = CityModel(name=name)
     session.add(new_city)
@@ -21,8 +22,33 @@ def add_new_city(name):
     session.close()
 
 
+def check_if_city_exist(name):
+    session = Session()
+    name = name.lower()
+    city = session.query(CityModel).filter_by(name=name).first()
+    session.close()
+
+    if city:
+        return True
+    else:
+        return False
+
+
+def check_if_area_exist(name, city_id):
+    session = Session()
+    name = name.lower()
+    area = session.query(CityAreaModel).filter_by(name=name, city_id=city_id).first()
+    session.close()
+
+    if area:
+        return True
+    else:
+        return False
+
+
 def add_new_area(city_id, area_name):
     session = Session()
+    area_name = area_name.lower()
     new_area = CityAreaModel(name=area_name, city_id=city_id)
     session.add(new_area)
     session.commit()
@@ -248,7 +274,8 @@ def subscribe_user_on_master(user_id, ref_url):
     master_id = get_master_id_by_ref_url(ref_url)
     user_id = get_user_id_by_telegram_id(user_id)
 
-    existing_subscription = session.query(user_master_association).filter_by(user_id=user_id, master_id=master_id).first()
+    existing_subscription = session.query(user_master_association).filter_by(user_id=user_id,
+                                                                             master_id=master_id).first()
     if not existing_subscription:
         session.execute(user_master_association.insert().values({'user_id': user_id, 'master_id': master_id}))
 
@@ -274,13 +301,9 @@ def get_all_user_subscribe_profiles(user_telegram_id):
     session = Session()
     user = session.query(UserModel).filter_by(telegram_id=user_telegram_id).first()
 
-    if user:
-        masters_ids = [master.id for master in user.masters]
-        session.close()
-        return masters_ids
-    else:
-        session.close()
-        print("Пользователь с указанным telegram_id не найден")
+    masters_ids = [master.id for master in user.masters]
+    session.close()
+    return masters_ids
 
 
 def get_all_partner_subscribe_profiles(user_telegram_id):
@@ -288,9 +311,7 @@ def get_all_partner_subscribe_profiles(user_telegram_id):
     master_ids = get_all_user_subscribe_profiles(user_telegram_id)
     partners_ids = [
         master_id for master_id in master_ids if
-        session.query(MasterModel.is_partner)
-            .filter_by(id=master_id, is_active=True)  # Добавляем фильтрацию по is_active
-            .scalar()
+        session.query(MasterModel).filter_by(id=master_id, is_active=True, is_partner=True).scalar()
     ]
     session.close()
     return partners_ids
@@ -299,14 +320,14 @@ def get_all_partner_subscribe_profiles(user_telegram_id):
 def get_all_master_subscribe_profiles(user_telegram_id):
     session = Session()
     master_ids = get_all_user_subscribe_profiles(user_telegram_id)
-    filtered_master_ids = [
+
+    master_ids = [
         master_id for master_id in master_ids if
-        session.query(MasterModel)
-            .filter_by(id=master_id, is_active=True, is_partner=False)
-            .all()
+        session.query(MasterModel).filter_by(id=master_id, is_active=True, is_partner=False).scalar()
     ]
+
     session.close()
-    return filtered_master_ids
+    return master_ids
 
 
 def get_questionary_for_user_menu_by_id(master_id):
@@ -389,10 +410,11 @@ def set_master_active_profile(master_id):
 
 
 def get_all_masters_id_by_name_city(city_name):
+    session = Session()
     try:
-        session = Session()
 
         city = session.query(CityModel).filter_by(name=city_name).first()
+        session.close()
 
         if city:
             masters_ids = []
@@ -402,18 +424,18 @@ def get_all_masters_id_by_name_city(city_name):
                     if not master.is_partner:
                         masters_ids.append(master.id)
 
-            session.close()
             return masters_ids
     except Exception:
+        session.close()
         return []
 
 
 def get_all_partners_id_by_name_city(city_name):
+    session = Session()
     try:
-        session = Session()
 
         city = session.query(CityModel).filter_by(name=city_name).first()
-
+        session.close()
         if city:
             partners_ids = []
 
@@ -422,7 +444,7 @@ def get_all_partners_id_by_name_city(city_name):
                     if master.is_partner:
                         partners_ids.append(master.id)
 
-            session.close()
             return partners_ids
     except Exception:
+        session.close()
         return []

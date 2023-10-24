@@ -1,6 +1,6 @@
 import traceback
 
-from beauty_bot.app.search_engine import profiles_masters_by_city, send_cites_to_find_masters_profiles, \
+from search_engine import profiles_masters_by_city, send_cites_to_find_masters_profiles, \
     next_page_admin_partner_menu_by_city, \
     previous_page_admin_master_menu_by_city, profiles_partners_by_city, send_cites_to_find_partners_profiles, \
     next_page_admin_master_menu_by_city, previous_page_admin_partner_menu_by_city, \
@@ -18,6 +18,7 @@ from services import is_login_command, admin_keyboard2, process_choose_type_mast
     next_page_partners_admin_menu, previous_page_partners_admin_menu, send_master_profile_by_referall_link
 from config import admin_key
 from extantions import bot
+from logger import log_error
 
 admin_id = []
 
@@ -32,8 +33,15 @@ def handle_start(message):
             send_master_profile_by_referall_link(message, referral_link)
             subscribe_on_master(message.chat.id, referral_link)
         else:
-            send_user_menu(message)
+            try:
+                send_user_menu(message)
+            except Exception:
+                traceback.print_exc()
+                bot.send_message(message.chat.id,
+                                 'Вы еще не подписались ни на один профиль, перейдите по реферальной ссылке.')
     except Exception as e:
+        traceback.print_exc()
+        log_error(e)
         bot.send_message(message.chat.id, "Ошибка обработки комманды(")
 
 
@@ -57,6 +65,7 @@ def handle_start(message):
 
     except Exception as e:
         traceback.print_exc()
+        log_error(e)
         bot.send_message(message.chat.id, "Ошибка обработки комманды login")
 
 
@@ -149,7 +158,7 @@ def handle_button_click(call):
             previous_page_admin_partner_menu_by_city(call)
 
     except Exception as e:
-        traceback.print_exc()
+        log_error(e)
         bot.send_message(call.message.chat.id, "Ошибка обработки комманды(")
 
 

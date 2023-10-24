@@ -2,10 +2,10 @@ import string
 import random
 import traceback
 
-from beauty_bot.app.keyboards import keyboard_with_areas_to_save_new_master, keyboard_with_towns_to_save_new_master, \
+from keyboards import keyboard_with_areas_to_save_new_master, keyboard_with_towns_to_save_new_master, \
     keyboard_with_towns, admin_keyboard2, menu_with_questionaries, keyboard_with_mailing_type, keyboard_master_menu, \
-    keyboard_to_srart_mailing, keyboard_with_user_menu, keyboard_with_user_partner_menu, \
-    keyboard_with_cities_to_find_masters_profile, keyboard_with_master
+    keyboard_to_srart_mailing, keyboard_with_user_menu, keyboard_with_user_partner_menu, keyboard_with_master
+from logger import log_error
 from db_queries import add_new_city, add_new_area, get_city_id_by_name, \
     add_new_master, get_partners_questionaries_for_admin_menu, get_area_id_by_name, \
     get_masters_questionaries_for_admin_menu, get_all_master_subscribers_by_master_telegram_username, \
@@ -14,9 +14,11 @@ from db_queries import add_new_city, add_new_area, get_city_id_by_name, \
     get_master_telegram_url_by_id, get_master_portfolio_url_by_id, \
     get_master_reviews_url_by_id, get_all_master_subscribe_profiles, get_all_partner_subscribe_profiles, \
     set_master_active_profile, get_all_masters_id_by_name_city, get_masters_questionaries_for_admin_menu_by_city, \
-    get_partners_questionaries_for_admin_menu_by_city, get_master_id_by_ref_url, get_questionary_for_user_menu_by_id
+    get_partners_questionaries_for_admin_menu_by_city, get_master_id_by_ref_url, get_questionary_for_user_menu_by_id, \
+    check_if_city_exist, check_if_area_exist
 from keyboards import keyboard_with_master_types
 from extantions import bot
+from config import bot_name_tg
 import secrets
 
 selected_area = ''
@@ -56,80 +58,104 @@ def process_choose_type_master(call):
 
 
 def handle_master_type_click(call):
-    bot.delete_message(call.message.chat.id, call.message.id)
+    try:
+        bot.delete_message(call.message.chat.id, call.message.id)
 
-    count = len('chose_type_')
-    if call.data[count:] == 'partner':
-        new_master_state['is_partner'] = True
-    else:
-        new_master_state['is_partner'] = False
+        count = len('chose_type_')
+        if call.data[count:] == 'partner':
+            new_master_state['is_partner'] = True
+        else:
+            new_master_state['is_partner'] = False
 
-    bot.send_message(call.message.chat.id, "Пришлите имя мастера/партнера")
+        bot.send_message(call.message.chat.id, "Пришлите имя мастера/партнера")
 
-    bot.register_next_step_handler(call.message, process_new_master_username_step)
+        bot.register_next_step_handler(call.message, process_new_master_username_step)
+    except Exception as e:
+        log_error(e)
+        bot.send_message(call.message.chat.id, "Ошибка обработки комманды")
 
 
 def process_new_master_username_step(message):
-    bot.delete_message(message.chat.id, message.id)
-    bot.delete_message(message.chat.id, message.id - 1)
+    try:
+        bot.delete_message(message.chat.id, message.id)
+        bot.delete_message(message.chat.id, message.id - 1)
 
-    new_master_state['username'] = message.text
+        new_master_state['username'] = message.text
 
-    bot.send_message(message.chat.id, "Пришлите фото для анкеты мастера")
-    bot.register_next_step_handler(message, process_new_master_photo_step)
+        bot.send_message(message.chat.id, "Пришлите фото для анкеты мастера")
+        bot.register_next_step_handler(message, process_new_master_photo_step)
+    except Exception as e:
+        log_error(e)
+        bot.send_message(message.chat.id, "Ошибка обработки комманды")
 
 
 def process_new_master_photo_step(message):
-    bot.delete_message(message.chat.id, message.id - 1)
-    bot.delete_message(message.chat.id, message.id)
+    try:
+        bot.delete_message(message.chat.id, message.id - 1)
+        bot.delete_message(message.chat.id, message.id)
 
-    photo = message.photo[-1]
-    file_id = photo.file_id
+        photo = message.photo[-1]
+        file_id = photo.file_id
 
-    file_info = bot.get_file(file_id)
-    file_path = file_info.file_path
+        file_info = bot.get_file(file_id)
+        file_path = file_info.file_path
 
-    downloaded_file = bot.download_file(file_path)
+        downloaded_file = bot.download_file(file_path)
 
-    file_name = generate_key(7)
+        file_name = generate_key(7)
 
-    with open(f'photos/{file_name}.jpg', 'wb') as new_file:
-        new_file.write(downloaded_file)
+        with open(f'photos/{file_name}.jpg', 'wb') as new_file:
+            new_file.write(downloaded_file)
 
-    new_master_state['file_name'] = file_name
+        new_master_state['file_name'] = file_name
 
-    bot.send_message(message.chat.id, "Отправьте телеграмм ссылку на анкету в виде @telgram_username")
-    bot.register_next_step_handler(message, process_master_telegram_id)
+        bot.send_message(message.chat.id, "Отправьте телеграмм ссылку на анкету в виде @telgram_username")
+        bot.register_next_step_handler(message, process_master_telegram_id)
+    except Exception as e:
+        log_error(e)
+        bot.send_message(message.chat.id, "Ошибка обработки комманды")
 
 
 def process_master_telegram_id(message):
-    bot.delete_message(message.chat.id, message.id)
-    bot.delete_message(message.chat.id, message.id - 1)
+    try:
+        bot.delete_message(message.chat.id, message.id)
+        bot.delete_message(message.chat.id, message.id - 1)
 
-    new_master_state['telegram_username'] = message.text
+        new_master_state['telegram_username'] = message.text
 
-    bot.send_message(message.chat.id, "Пришлите ссылку на отзывы анкеты")
-    bot.register_next_step_handler(message, process_master_reviews_url)
+        bot.send_message(message.chat.id, "Пришлите ссылку на отзывы анкеты")
+        bot.register_next_step_handler(message, process_master_reviews_url)
+    except Exception as e:
+        log_error(e)
+        bot.send_message(message.chat.id, "Ошибка обработки комманды")
 
 
 def process_master_reviews_url(message):
-    bot.delete_message(message.chat.id, message.id)
-    bot.delete_message(message.chat.id, message.id - 1)
+    try:
+        bot.delete_message(message.chat.id, message.id)
+        bot.delete_message(message.chat.id, message.id - 1)
 
-    new_master_state['reviews_url'] = message.text
+        new_master_state['reviews_url'] = message.text
 
-    bot.send_message(message.chat.id, "Пришлите ссылку на портфолио анкеты")
-    bot.register_next_step_handler(message, process_portfolio_url)
+        bot.send_message(message.chat.id, "Пришлите ссылку на портфолио анкеты")
+        bot.register_next_step_handler(message, process_portfolio_url)
+    except Exception as e:
+        log_error(e)
+        bot.send_message(message.chat.id, "Ошибка обработки комманды")
 
 
 def process_portfolio_url(message):
-    bot.delete_message(message.chat.id, message.id)
-    bot.delete_message(message.chat.id, message.id - 1)
+    try:
+        bot.delete_message(message.chat.id, message.id)
+        bot.delete_message(message.chat.id, message.id - 1)
 
-    new_master_state['portfolio_url'] = message.text
+        new_master_state['portfolio_url'] = message.text
 
-    bot.send_message(message.chat.id, "Пришлите описание анкеты")
-    bot.register_next_step_handler(message, process_new_master_description)
+        bot.send_message(message.chat.id, "Пришлите описание анкеты")
+        bot.register_next_step_handler(message, process_new_master_description)
+    except Exception as e:
+        log_error(e)
+        bot.send_message(message.chat.id, "Ошибка обработки комманды")
 
 
 def process_new_master_description(message):
@@ -182,7 +208,7 @@ def handle_save_new_master(call):
 
     bot.send_message(call.message.chat.id, f"Анкета {value} {new_master_state['username']} создана!\n"
                                            f"Api key: {api_key} \n"
-                                           f"Referal link: https://t.me/test_beauty_kwork_bot?start={referal_key}")
+                                           f"Referal link: https://t.me/{bot_name_tg}?start={referal_key}")
     bot.send_message(call.message.chat.id, "Меню админа", reply_markup=admin_keyboard2())
 
 
@@ -204,7 +230,7 @@ def send_menu_with_partners(call):
 
 
 def send_menu_with_questionaries(call, type):
-    # try:
+    try:
         try:
             bot.delete_message(call.message.chat.id, call.message.id)
 
@@ -222,28 +248,26 @@ def send_menu_with_questionaries(call, type):
             page_numbers = f"{partners_page_questionare}/{data['page_counter']}"
 
         message = f"{data['questionary']['description']} \n" \
-                  f"Город: {data['questionary']['city_name']} \n" \
-                  f"Район города: {data['questionary']['area_name']} \n"
+                  f"Город: {data['questionary']['city_name'].capitalize()} \n" \
+                  f"Район города: {data['questionary']['area_name'].capitalize()} \n"
 
         global all_questionaries
         all_questionaries = data['page_counter']
 
         with open(f"photos/{data['questionary']['url_to_photo']}.jpg", 'rb') as photo:
             bot.send_photo(call.message.chat.id, photo)
-        bot.send_message(call.message.chat.id, message)
 
-        bot.send_message(call.message.chat.id, "Анкеты партнеров:",
+        bot.send_message(call.message.chat.id, message,
                          reply_markup=menu_with_questionaries(data['questionary']['is_active'],
                                                               page_numbers, type, data['questionary']['master_id']))
 
-    # except Exception:
-    #     bot.send_message(call.message.chat.id, "Не создано еще ни одной анкеты.")
-    #     bot.send_message(call.message.chat.id, "Меню админа", reply_markup=admin_keyboard2())
+    except Exception:
+        bot.send_message(call.message.chat.id, "Не создано еще ни одной анкеты.")
+        bot.send_message(call.message.chat.id, "Меню админа", reply_markup=admin_keyboard2())
 
 
 def next_page_masters_admin_menu(call):
     bot.delete_message(call.message.chat.id, call.message.id - 1)
-    bot.delete_message(call.message.chat.id, call.message.id - 2)
 
     global masters_page_questionare
 
@@ -252,13 +276,11 @@ def next_page_masters_admin_menu(call):
     else:
         masters_page_questionare += 1
 
-    print(call.data)
     send_menu_with_questionaries(call, call.data[len('ad_next_page_'):])
 
 
 def previous_page_masters_admin_menu(call):
     bot.delete_message(call.message.chat.id, call.message.id - 1)
-    bot.delete_message(call.message.chat.id, call.message.id - 2)
 
     global masters_page_questionare
     if masters_page_questionare == 1:
@@ -271,7 +293,6 @@ def previous_page_masters_admin_menu(call):
 
 def next_page_partners_admin_menu(call):
     bot.delete_message(call.message.chat.id, call.message.id - 1)
-    bot.delete_message(call.message.chat.id, call.message.id - 2)
 
     global partners_page_questionare
 
@@ -285,7 +306,6 @@ def next_page_partners_admin_menu(call):
 
 def previous_page_partners_admin_menu(call):
     bot.delete_message(call.message.chat.id, call.message.id - 1)
-    bot.delete_message(call.message.chat.id, call.message.id - 2)
 
     global partners_page_questionare
     if partners_page_questionare == 1:
@@ -298,7 +318,7 @@ def previous_page_partners_admin_menu(call):
 
 def process_ckeck_city(message):
     global selected_area
-    selected_area = message.text
+    selected_area = message.text.lower()
 
     bot.delete_message(message.chat.id, message.id)
     bot.delete_message(message.chat.id, message.id - 1)
@@ -310,37 +330,54 @@ def process_save_new_city(message):
     bot.delete_message(message.chat.id, message.id)
     bot.delete_message(message.chat.id, message.id - 1)
 
-    bot.send_message(message.chat.id, f'Город "{message.text}" успешно создан')
-    add_new_city(message.text)
+    if check_if_city_exist(message.text):
+        bot.send_message(message.chat.id, f'Данный город уже существует')
+    else:
+        bot.send_message(message.chat.id, f'Город "{message.text.capitalize()}" успешно создан')
+        add_new_city(message.text)
+
     bot.send_message(message.chat.id, "Меню админа", reply_markup=admin_keyboard2())
 
 
 def handle_button2_click(call):
-    bot.delete_message(call.message.chat.id, call.message.id)
-    bot.send_message(call.message.chat.id, "Напишите название города:")
-    bot.register_next_step_handler(call.message, process_save_new_city)
+    try:
+        bot.delete_message(call.message.chat.id, call.message.id)
+        bot.send_message(call.message.chat.id, "Напишите название города:")
+        bot.register_next_step_handler(call.message, process_save_new_city)
+    except Exception as e:
+        log_error(e)
+        bot.send_message(call.message.chat.id, "Ошибка обработки комманды")
 
 
 def handle_button3_click(call):
-    bot.delete_message(call.message.chat.id, call.message.id)
-    bot.send_message(call.message.chat.id, "Напишите название района города:")
-    bot.register_next_step_handler(call.message, process_ckeck_city)
+    try:
+        bot.delete_message(call.message.chat.id, call.message.id)
+        bot.send_message(call.message.chat.id, "Напишите название района города:")
+        bot.register_next_step_handler(call.message, process_ckeck_city)
+    except Exception as e:
+        log_error(e)
+        bot.send_message(call.message.chat.id, "Ошибка обработки комманды")
 
 
 def handle_save_area_town(call):
     bot.delete_message(call.message.chat.id, call.message.id)
 
     city_id = get_city_id_by_name(call.data[5:])
-    add_new_area(city_id, selected_area)
 
-    bot.send_message(call.message.chat.id, f'Район "{selected_area}" успешно добавлен для города "{call.data[5:]}"')
-    bot.send_message(call.message.chat.id, "Меню админа", reply_markup=admin_keyboard2())
+    if check_if_area_exist(selected_area, city_id):
+        bot.send_message(call.message.chat.id,
+                         f'Район "{selected_area.capitalize()}" уже существует в городе "{call.data[5:].capitalize()}"')
+        bot.send_message(call.message.chat.id, "Меню админа", reply_markup=admin_keyboard2())
+    else:
+        add_new_area(city_id, selected_area)
+        bot.send_message(call.message.chat.id,
+                         f'Район "{selected_area.capitalize()}" успешно добавлен для города "{call.data[5:].capitalize()}"')
+        bot.send_message(call.message.chat.id, "Меню админа", reply_markup=admin_keyboard2())
 
 
 def back_to_admin_menu_from_questionaries(call):
     bot.delete_message(call.message.chat.id, call.message.id)
     bot.delete_message(call.message.chat.id, call.message.id - 1)
-    bot.delete_message(call.message.chat.id, call.message.id - 2)
 
     bot.send_message(call.message.chat.id, "Меню админа:", reply_markup=admin_keyboard2())
 
@@ -355,7 +392,6 @@ def back_to_admin_menu_create_questionary(call):
 def change_master_visibility(call):
     bot.delete_message(call.message.chat.id, call.message.id)
     bot.delete_message(call.message.chat.id, call.message.id - 1)
-    bot.delete_message(call.message.chat.id, call.message.id - 2)
 
     master_id = call.data[len('acv_') + 1:]
     set_master_active_profile(master_id)
@@ -366,7 +402,6 @@ def change_master_visibility(call):
 def change_partner_visibility(call):
     bot.delete_message(call.message.chat.id, call.message.id)
     bot.delete_message(call.message.chat.id, call.message.id - 1)
-    bot.delete_message(call.message.chat.id, call.message.id - 2)
 
     master_id = call.data[len('acv_') + 1:]
     set_master_active_profile(master_id)
@@ -394,41 +429,53 @@ def send_keyboard_with_mailing_type(call):
 
 
 def process_answer_for_new_mailing_with_photo(call):
-    bot.delete_message(call.message.chat.id, call.message.id)
-    bot.send_message(call.message.chat.id, "Пришлите фото для рассылки")
+    try:
+        bot.delete_message(call.message.chat.id, call.message.id)
+        bot.send_message(call.message.chat.id, "Пришлите фото для рассылки")
 
-    bot.register_next_step_handler(call.message, process_save_photo_for_new_mailing)
+        bot.register_next_step_handler(call.message, process_save_photo_for_new_mailing)
+    except Exception as e:
+        log_error(e)
+        bot.send_message(call.message.chat.id, "Ошибка обработки комманды")
 
 
 def process_answer_for_new_mailing_without_photo(call):
-    bot.delete_message(call.message.chat.id, call.message.id)
-    bot.send_message(call.message.chat.id, "Пришлите описание для рассылки")
+    try:
+        bot.delete_message(call.message.chat.id, call.message.id)
+        bot.send_message(call.message.chat.id, "Пришлите описание для рассылки")
 
-    bot.register_next_step_handler(call.message, process_save_description_for_new_mailing)
+        bot.register_next_step_handler(call.message, process_save_description_for_new_mailing)
+    except Exception as e:
+        log_error(e)
+        bot.send_message(call.message.chat.id, "Ошибка обработки комманды")
 
 
 def process_save_photo_for_new_mailing(message):
-    bot.delete_message(message.chat.id, message.id)
-    bot.delete_message(message.chat.id, message.id - 1)
+    try:
+        bot.delete_message(message.chat.id, message.id)
+        bot.delete_message(message.chat.id, message.id - 1)
 
-    photo = message.photo[-1]
-    file_id = photo.file_id
+        photo = message.photo[-1]
+        file_id = photo.file_id
 
-    file_info = bot.get_file(file_id)
-    file_path = file_info.file_path
+        file_info = bot.get_file(file_id)
+        file_path = file_info.file_path
 
-    downloaded_file = bot.download_file(file_path)
+        downloaded_file = bot.download_file(file_path)
 
-    file_name = generate_key(7)
+        file_name = generate_key(7)
 
-    with open(f'photos/{file_name}.jpg', 'wb') as new_file:
-        new_file.write(downloaded_file)
+        with open(f'photos/{file_name}.jpg', 'wb') as new_file:
+            new_file.write(downloaded_file)
 
-    new_masters_mailing_state[message.chat.id]['photo'] = file_name
+        new_masters_mailing_state[message.chat.id]['photo'] = file_name
 
-    bot.send_message(message.chat.id, "Пришлите описание для рассылки")
+        bot.send_message(message.chat.id, "Пришлите описание для рассылки")
 
-    bot.register_next_step_handler(message, process_save_description_for_new_mailing)
+        bot.register_next_step_handler(message, process_save_description_for_new_mailing)
+    except Exception as e:
+        log_error(e)
+        bot.send_message(message.chat.id, "Ошибка обработки комманды(")
 
 
 def process_save_description_for_new_mailing(message):
@@ -492,7 +539,6 @@ user_state = {}
 
 
 def send_user_menu(message):
-
     try:
         bot.delete_message(message.chat.id, message.id)
         bot.delete_message(message.chat.id, message.id - 1)
@@ -505,23 +551,28 @@ def send_user_menu(message):
         user_state[message.chat.id] = {'masters': {'page': 1, 'count_pages': 1}}
 
     user_masters_id = get_all_master_subscribe_profiles(message.chat.id)
-    user_page = user_state[message.chat.id]['masters']['page']
 
-    master_id = user_masters_id[user_page - 1]
+    if not user_masters_id:
+        bot.send_message(message.chat.id, 'Вы еще не подписались ни на один профиль')
+    else:
+        user_page = user_state[message.chat.id]['masters']['page']
 
-    counter = str(user_state[message.chat.id]['masters']['page']) + '/' + str(len(user_masters_id))
-    user_state[message.chat.id]['masters']['number_all_pages'] = len(user_masters_id)
+        master_id = user_masters_id[user_page - 1]
 
-    data_profile = get_masters_profiles_for_user_menu(master_id)
-    message_text = f"{data_profile['username']} \n" \
-                   f"{data_profile['description']} \n" \
-                   f"Город: {data_profile['city']} \n" \
-                   f"Район города: {data_profile['area']} \n"
+        counter = str(user_state[message.chat.id]['masters']['page']) + '/' + str(len(user_masters_id))
+        user_state[message.chat.id]['masters']['number_all_pages'] = len(user_masters_id)
 
-    with open(f"photos/{data_profile['url_to_photo']}.jpg", 'rb') as photo:
-        bot.send_photo(message.chat.id, photo)
+        data_profile = get_masters_profiles_for_user_menu(master_id)
+        message_text = f"{data_profile['username']} \n" \
+                       f"{data_profile['description']} \n" \
+                       f"Город: {data_profile['city'].capitalize()} \n" \
+                       f"Район города: {data_profile['area'].capitalize()} \n"
 
-    bot.send_message(message.chat.id, message_text, reply_markup=keyboard_with_user_menu(data_profile['id'], counter))
+        with open(f"photos/{data_profile['url_to_photo']}.jpg", 'rb') as photo:
+            bot.send_photo(message.chat.id, photo)
+
+        bot.send_message(message.chat.id, message_text,
+                         reply_markup=keyboard_with_user_menu(data_profile['id'], counter))
 
 
 def next_page_user_menu(call):
@@ -587,23 +638,28 @@ def send_keyboard_with_partners(message):
         user_state[message.chat.id] = {'partners': {'page': 1, 'count_pages': 1}}
 
     user_masters_id = get_all_partner_subscribe_profiles(message.chat.id)
-    user_page = user_state[message.chat.id]['partners']['page']
-    master_id = user_masters_id[user_page - 1]
 
-    counter = str(user_state[message.chat.id]['partners']['page']) + '/' + str(len(user_masters_id))
-    user_state[message.chat.id]['partners']['number_all_pages'] = len(user_masters_id)
+    if not user_masters_id:
+        bot.send_message(message.chat.id, 'Вы еще не подписались ни на один профиль')
 
-    data_profile = get_masters_profiles_for_user_menu(master_id)
-    message_text = f"{data_profile['username']} \n" \
-                   f"{data_profile['description']} \n" \
-                   f"Город: {data_profile['city']} \n" \
-                   f"Район города: {data_profile['area']} \n"
+    else:
+        user_page = user_state[message.chat.id]['partners']['page']
+        master_id = user_masters_id[user_page - 1]
 
-    with open(f"photos/{data_profile['url_to_photo']}.jpg", 'rb') as photo:
-        bot.send_photo(message.chat.id, photo)
+        counter = str(user_state[message.chat.id]['partners']['page']) + '/' + str(len(user_masters_id))
+        user_state[message.chat.id]['partners']['number_all_pages'] = len(user_masters_id)
 
-    bot.send_message(message.chat.id, message_text,
-                     reply_markup=keyboard_with_user_partner_menu(data_profile['id'], counter))
+        data_profile = get_masters_profiles_for_user_menu(master_id)
+        message_text = f"{data_profile['username']} \n" \
+                       f"{data_profile['description']} \n" \
+                       f"Город: {data_profile['city']} \n" \
+                       f"Район города: {data_profile['area']} \n"
+
+        with open(f"photos/{data_profile['url_to_photo']}.jpg", 'rb') as photo:
+            bot.send_photo(message.chat.id, photo)
+
+        bot.send_message(message.chat.id, message_text,
+                         reply_markup=keyboard_with_user_partner_menu(data_profile['id'], counter))
 
 
 def next_page_user_partners_menu(call):
@@ -643,8 +699,8 @@ def send_master_profile_by_referall_link(message, refferal_link):
 
     message_text = f"{master['username']} \n" \
                    f"{master['description']} \n" \
-                   f"Город: {master['city']} \n" \
-                   f"Район города: {master['area']} \n"
+                   f"Город: {master['city'].capitalize()} \n" \
+                   f"Район города: {master['area'].capitalize()} \n"
 
     bot.send_message(message.chat.id, message_text,
                      reply_markup=keyboard_with_master(master['id']))

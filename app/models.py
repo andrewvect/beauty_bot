@@ -33,7 +33,7 @@ class MasterModel(Base):
     key = Column(String(50), unique=True, nullable=False)
     referal_link = Column(String(100), unique=True, nullable=False)
     description = Column(String(500))
-    username = Column(String(100), unique=True, nullable=False)
+    username = Column(String(100), unique=False, nullable=False)
     url_to_photo = Column(String(200), unique=True, nullable=False)
     is_partner = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
@@ -58,7 +58,7 @@ class CityAreaModel(Base):
     __tablename__ = 'areas'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(100), unique=True, nullable=False)
+    name = Column(String(100), unique=False, nullable=False)
     city_id = Column(Integer, ForeignKey('cities.id'))
 
     masters = relationship('MasterModel', back_populates='areas')

@@ -1,7 +1,7 @@
 from telebot import types
 from telebot.types import InlineKeyboardButton
 
-from beauty_bot.app.db_queries import get_all_cities, get_all_areas_by_city_name
+from db_queries import get_all_cities, get_all_areas_by_city_name
 
 
 def keyboard_with_towns():
@@ -10,7 +10,7 @@ def keyboard_with_towns():
     all_cities = get_all_cities()
 
     for city in all_cities:
-        button = types.InlineKeyboardButton(text=city, callback_data=f"town_{city}")
+        button = types.InlineKeyboardButton(text=city.capitalize(), callback_data=f"town_{city}")
         keyboard.add(button)
 
     return keyboard
@@ -30,7 +30,6 @@ def keyboard_with_cities_to_find_masters_profile():
 
 def keyboard_with_cities_to_find_partners_profile():
     keyboard = types.InlineKeyboardMarkup()
-    print(1111)
 
     all_cities = get_all_cities()
 
@@ -39,7 +38,6 @@ def keyboard_with_cities_to_find_partners_profile():
         keyboard.add(button)
 
     return keyboard
-
 
 
 def keyboard_with_areas_to_save_new_master(city_name):

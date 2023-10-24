@@ -1,9 +1,8 @@
-from beauty_bot.app.db_queries import get_all_masters_id_by_name_city, get_masters_questionaries_for_admin_menu_by_city, \
+from db_queries import get_all_masters_id_by_name_city, get_masters_questionaries_for_admin_menu_by_city, \
     get_partners_questionaries_for_admin_menu_by_city, get_all_partners_id_by_name_city, set_master_active_profile
-from beauty_bot.app.extantions import bot
-from beauty_bot.app.keyboards import menu_with_questionaries_search_by_city, \
+from extantions import bot
+from keyboards import menu_with_questionaries_search_by_city, \
     keyboard_with_cities_to_find_masters_profile, keyboard_with_cities_to_find_partners_profile
-from beauty_bot.app.services import send_menu_with_masters
 
 page_masters_questionare = 1
 page_partners_questionare = 1
@@ -78,8 +77,8 @@ def send_menu_with_questionaries(call, type, masters_ids):
         page_numbers = f"{page_partners_questionare}/{data['page_counter']}"
 
     message = f"{data['questionary']['description']} \n" \
-              f"Город: {data['questionary']['city_name']} \n" \
-              f"Район города: {data['questionary']['area_name']} \n"
+              f"Город: {data['questionary']['city_name'].capitalize()} \n" \
+              f"Район города: {data['questionary']['area_name'].capitalize()} \n"
 
     global all_questionaries
     all_questionaries = data['page_counter']
@@ -87,9 +86,7 @@ def send_menu_with_questionaries(call, type, masters_ids):
     with open(f"photos/{data['questionary']['url_to_photo']}.jpg", 'rb') as photo:
         bot.send_photo(call.message.chat.id, photo)
 
-    bot.send_message(call.message.chat.id, message)
-
-    bot.send_message(call.message.chat.id, "Меню:",
+    bot.send_message(call.message.chat.id, message,
                      reply_markup=menu_with_questionaries_search_by_city(data['questionary']['is_active'],
                                                                          page_numbers,
                                                                          type,
@@ -172,7 +169,6 @@ def previous_page_admin_partner_menu_by_city(call):
 def change_partner_visibility_in_find_menu(call):
     bot.delete_message(call.message.chat.id, call.message.id)
     bot.delete_message(call.message.chat.id, call.message.id - 1)
-    bot.delete_message(call.message.chat.id, call.message.id - 2)
 
     master_id = call.data[len('acvF_') + 1:]
     set_master_active_profile(master_id)
@@ -185,7 +181,6 @@ def change_partner_visibility_in_find_menu(call):
 def change_master_visibility_in_find_menu(call):
     bot.delete_message(call.message.chat.id, call.message.id)
     bot.delete_message(call.message.chat.id, call.message.id - 1)
-    bot.delete_message(call.message.chat.id, call.message.id - 2)
 
     master_id = call.data[len('acvF_') + 1:]
     set_master_active_profile(master_id)

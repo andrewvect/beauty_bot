@@ -1,8 +1,5 @@
-from sqlalchemy import Column, Integer, String, DateTime, BigInteger, Boolean, Table, ForeignKey, create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy import create_engine
 
-Base = declarative_base()
 
 from sqlalchemy import Table, Column, Integer, BigInteger, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
@@ -33,7 +30,7 @@ class MasterModel(Base):
     key = Column(String(50), unique=True, nullable=False)
     referal_link = Column(String(100), unique=True, nullable=False)
     description = Column(String(500))
-    username = Column(String(100), unique=True, nullable=False)
+    username = Column(String(100), unique=False, nullable=False)
     url_to_photo = Column(String(200), unique=True, nullable=False)
     is_partner = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
@@ -58,12 +55,15 @@ class CityAreaModel(Base):
     __tablename__ = 'areas'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(100), unique=True, nullable=False)
+    name = Column(String(100), unique=False, nullable=False)
     city_id = Column(Integer, ForeignKey('cities.id'))
 
     masters = relationship('MasterModel', back_populates='areas')
     city = relationship('CityModel', back_populates='areas')
 
+    def __str__(self):
+        return self.name
+
 
 engine = create_engine("sqlite:///beauty_bot.db")
-Base.metadata.create_all(engine)
+

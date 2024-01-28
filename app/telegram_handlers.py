@@ -1,39 +1,63 @@
+
 import traceback
 
-from beauty_bot.app.search_engine import profiles_masters_by_city, send_cites_to_find_masters_profiles, \
-    next_page_admin_partner_menu_by_city, \
-    previous_page_admin_master_menu_by_city, profiles_partners_by_city, send_cites_to_find_partners_profiles, \
-    next_page_admin_master_menu_by_city, previous_page_admin_partner_menu_by_city, \
-    change_master_visibility_in_find_menu, change_partner_visibility_in_find_menu
-from services import is_login_command, admin_keyboard2, process_choose_type_master, handle_button2_click, \
-    handle_button3_click, handle_save_area_town, handle_save_new_master_town, handle_save_new_master, \
-    handle_master_type_click, back_to_admin_menu_from_questionaries, next_page_masters_admin_menu, \
-    previous_page_masters_admin_menu, send_menu_with_partners, send_menu_with_masters, \
-    admin_logout, send_keyboard_with_mailing_type, send_keyboard_with_master_menu, \
-    process_answer_for_new_mailing_with_photo, start_mailing, \
-    check_master_key, subscribe_on_master, process_answer_for_new_mailing_without_photo, send_user_menu, \
-    next_page_user_menu, previous_page_user_menu, send_master_url_to_telegram, send_master_url_to_portfolio, \
-    send_master_url_to_reviews, send_keyboard_with_partners, next_page_user_partners_menu, \
-    previous_page_user_partners_menu, change_master_visibility, change_partner_visibility, \
-    next_page_partners_admin_menu, previous_page_partners_admin_menu, send_master_profile_by_referall_link
+from beauty_bot.app.admin.admin_mailing_engine import process_answer_for_new_admin_mailing_with_photo, \
+    send_keyboard_with_mailing_type_for_admin, \
+    process_answer_for_new_mailing_without_photo_as_admin, start_mailing_as_admin, \
+    process_save_city_for_new_mailing_as_admin, process_save_area_for_new_mailing_as_admin
+from beauty_bot.app.admin.menu_with_masters import \
+     send_menu_with_masters, back_to_admin_menu_from_questionaries, \
+     next_page_masters_admin_menu, previous_page_masters_admin_menu,  \
+     admin_logout, change_master_visibility
+from beauty_bot.app.admin.menu_with_partners import send_menu_with_partners, next_page_partners_admin_menu, \
+    previous_page_partners_admin_menu, change_partner_visibility
+from beauty_bot.app.admin.save_new_area import handle_button3_click, handle_save_area_town
+from beauty_bot.app.admin.save_new_city import handle_button2_click
+from beauty_bot.app.admin.save_new_master_or_partner import process_choose_type_master, handle_save_new_master_town, \
+    handle_save_new_master, handle_master_type_click
+from beauty_bot.app.admin.search_engine_partners import change_partner_visibility_in_find_menu, \
+    send_cites_to_find_partners_profiles, profiles_partners_by_city, next_page_admin_partner_menu_by_city, \
+    previous_page_admin_partner_menu_by_city
+from beauty_bot.app.db_queries import add_user_to_database
+from beauty_bot.app.keyboards import admin_keyboard2
+from beauty_bot.app.master.master_menu import check_master_key, send_keyboard_with_master_menu, \
+    send_keyboard_with_mailing_type, process_answer_for_new_mailing_with_photo, \
+    process_answer_for_new_mailing_without_photo, start_mailing
+from beauty_bot.app.user.user_masters_menu import subscribe_on_master, send_menu_with_questionarties_masters, next_page_user_menu, \
+    previous_page_user_menu, send_menu_with_questionarties_masters2
+from beauty_bot.app.admin.search_engine_masters import profiles_masters_by_city, send_cites_to_find_masters_profiles, \
+    change_master_visibility_in_find_menu, next_page_admin_master_menu_by_city, previous_page_admin_master_menu_by_city
+from beauty_bot.app.user.user_partners_menu import process_partners_menu, previous_page_user_partners_menu, \
+    next_page_user_partners_menu
+from services import is_login_command
 from config import admin_key
-from extantions import bot
+from beauty_bot.extantions import bot
+from logger import log_error
 
 admin_id = []
 
 
 @bot.message_handler(commands=['start'])
 def handle_start(message):
+
+    add_user_to_database(message.chat.id)
     try:
         referral_link = message.text.split(' ')[1] if len(message.text.split(' ')) > 1 else None
 
         if referral_link:
             bot.reply_to(message, f"Вы использовали реферральную ссылку: {referral_link}")
-            send_master_profile_by_referall_link(message, referral_link)
-            subscribe_on_master(message.chat.id, referral_link)
+            subscribe_on_master(message, referral_link)
         else:
-            send_user_menu(message)
+            try:
+                send_menu_with_questionarties_masters(message)
+            except Exception:
+                with open(f"beauty_bot/app/photos/title.jpg", 'rb') as photo:
+                    bot.send_photo(message.chat.id, photo,
+                                   caption='Чтобы пользоваться сервисом onebeauty - запустите его по реферальной ссылке мастера.')
+
     except Exception as e:
+        traceback.print_exc()
+        log_error(e)
         bot.send_message(message.chat.id, "Ошибка обработки комманды(")
 
 
@@ -57,11 +81,13 @@ def handle_start(message):
 
     except Exception as e:
         traceback.print_exc()
+        log_error(e)
         bot.send_message(message.chat.id, "Ошибка обработки комманды login")
 
 
 @bot.callback_query_handler(func=lambda call: True)
 def handle_button_click(call):
+    print(call.data)
     try:
         if call.data.startswith('type_'):
             process_choose_type_master(call)
@@ -107,30 +133,22 @@ def handle_button_click(call):
             next_page_user_menu(call)
         if call.data == 'previous_user_menu_':
             previous_page_user_menu(call)
-        if call.data.startswith('ms_cont_'):
-            send_master_url_to_telegram(call)
-        if call.data.startswith('ms_port_'):
-            send_master_url_to_portfolio(call)
-        if call.data.startswith('ms_reviews_'):
-            send_master_url_to_reviews(call)
-        if call.data == ('partners'):
-            send_keyboard_with_partners(call.message)
+        if call.data.startswith('partners_mn_'):
+            process_partners_menu(call)
         if call.data == 'previous_partn_menu_':
             previous_page_user_partners_menu(call)
         if call.data == 'next_partn_menu_':
             next_page_user_partners_menu(call)
         if call.data == 'back_us_menu':
-            send_user_menu(call.message)
+            send_menu_with_questionarties_masters2(call.message)
         if call.data.startswith('acv_M'):
             change_master_visibility(call)
         if call.data.startswith('acv_P'):
             change_partner_visibility(call)
-
         if call.data.startswith('acvF_M'):
             change_master_visibility_in_find_menu(call)
         if call.data.startswith('acvF_P'):
             change_partner_visibility_in_find_menu(call)
-
         if call.data.startswith('search_as_adminM'):
             send_cites_to_find_masters_profiles(call)
         if call.data.startswith('search_as_adminP'):
@@ -139,17 +157,32 @@ def handle_button_click(call):
             profiles_masters_by_city(call)
         if call.data.startswith('fP_'):
             profiles_partners_by_city(call)
-        if call.data == 'ad_f_next_ct_masters':
+        if call.data == 'ad_f_next_M':
             next_page_admin_master_menu_by_city(call)
-        if call.data == 'ad_f_previous_ct_masters':
+        if call.data == 'ad_f_previous_M':
             previous_page_admin_master_menu_by_city(call)
-        if call.data == 'ad_f_next_ct_partners':
+        if call.data == 'ad_f_next_P':
             next_page_admin_partner_menu_by_city(call)
-        if call.data == 'ad_f_previous_ct_partners':
+        if call.data == 'ad_f_previous_P':
             previous_page_admin_partner_menu_by_city(call)
+        if call.data == 'admin_mailing':
+            send_keyboard_with_mailing_type_for_admin(call)
+        if call.data == 'ad_ml_w_photo':
+            process_answer_for_new_admin_mailing_with_photo(call)
+        if call.data == 'ad_ml_wiout_photo':
+            process_answer_for_new_mailing_without_photo_as_admin(call)
+        if call.data.startswith('ad_ml_c'):
+            process_save_city_for_new_mailing_as_admin(call)
+        if call.data.startswith('ad_ml_dist_'):
+            process_save_area_for_new_mailing_as_admin(call)
+        if call.data == 'start_ml_ad':
+            start_mailing_as_admin(call)
+        if call.data == 'return_to_admin_menu':
+            start_mailing_as_admin(call)
 
     except Exception as e:
         traceback.print_exc()
+        log_error(e)
         bot.send_message(call.message.chat.id, "Ошибка обработки комманды(")
 
 

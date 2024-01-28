@@ -1,3 +1,3 @@
-admin_key = '1'
-bot_key = '6509771662:AAGQxf4jQT-bW_ooUYEPaDBTXgYXuUB_Fr0'
-bot_name = ''
+admin_key = 'one2six13'
+bot_key = '5829140371:AAE-VgcQJaUaaOeNiHgP_x2Hu2kblyh_ZQo'
+bot_name_tg = '@OneBeauty_bot'

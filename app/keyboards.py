@@ -1,7 +1,7 @@
 from telebot import types
 from telebot.types import InlineKeyboardButton
 
-from beauty_bot.app.db_queries import get_all_cities, get_all_areas_by_city_name
+from db_queries import get_all_cities, get_all_areas_by_city_name
 
 
 def keyboard_with_towns():
@@ -10,7 +10,7 @@ def keyboard_with_towns():
     all_cities = get_all_cities()
 
     for city in all_cities:
-        button = types.InlineKeyboardButton(text=city, callback_data=f"town_{city}")
+        button = types.InlineKeyboardButton(text=city.capitalize(), callback_data=f"town_{city}")
         keyboard.add(button)
 
     return keyboard
@@ -30,7 +30,6 @@ def keyboard_with_cities_to_find_masters_profile():
 
 def keyboard_with_cities_to_find_partners_profile():
     keyboard = types.InlineKeyboardMarkup()
-    print(1111)
 
     all_cities = get_all_cities()
 
@@ -39,7 +38,6 @@ def keyboard_with_cities_to_find_partners_profile():
         keyboard.add(button)
 
     return keyboard
-
 
 
 def keyboard_with_areas_to_save_new_master(city_name):
@@ -71,7 +69,8 @@ def admin_keyboard2():
     inline_btn_3 = InlineKeyboardButton('Добавить район', callback_data='button3')
     inline_btn_4 = InlineKeyboardButton('Анкеты партнеров', callback_data='partners_questionnaires')
     inline_btn_5 = InlineKeyboardButton('Анкеты мастеров', callback_data='masters_questionnaires')
-    inline_btn_6 = InlineKeyboardButton('Выйти', callback_data='logout')
+    inline_btn_6 = InlineKeyboardButton('Рассылка', callback_data='admin_mailing')
+    inline_btn_7 = InlineKeyboardButton('Выйти', callback_data='logout')
 
     inline_full = types.InlineKeyboardMarkup()
     inline_full.add(inline_btn_1)
@@ -80,6 +79,7 @@ def admin_keyboard2():
     inline_full.add(inline_btn_4)
     inline_full.add(inline_btn_5)
     inline_full.add(inline_btn_6)
+    inline_full.add(inline_btn_7)
 
     return inline_full
 
@@ -168,12 +168,12 @@ def keyboard_to_srart_mailing():
     return inline_full
 
 
-def keyboard_with_user_menu(master_id, counter):
-    inline_btn_1 = InlineKeyboardButton('Записаться', callback_data=f'ms_cont_{master_id}')
+def keyboard_with_user_menu(master_id, counter, url_to_reviews, url_to_works, url_to_master, city_id):
+    inline_btn_1 = InlineKeyboardButton('Записаться', callback_data=f'ms_cont_{master_id}', url='t.me/'+url_to_master[1:])
     inline_btn_2 = InlineKeyboardButton('Работы мастера',
-                                        callback_data=f'ms_port_{master_id}')
-    inline_btn_3 = InlineKeyboardButton('Отзывы', callback_data=f'ms_reviews_{master_id}')
-    inline_btn_4 = InlineKeyboardButton('Партнеры', callback_data=f'partners')
+                                        callback_data=f'ms_port_{master_id}', url=url_to_works)
+    inline_btn_3 = InlineKeyboardButton('Отзывы', callback_data=f'ms_reviews_{master_id}', url=url_to_reviews)
+    inline_btn_4 = InlineKeyboardButton('Партнеры', callback_data=f'partners_mn_{city_id}')
 
     row2 = [types.InlineKeyboardButton('⏪', callback_data=f'previous_user_menu_'),
             types.InlineKeyboardButton(f'{counter}', callback_data='__'),
@@ -189,11 +189,11 @@ def keyboard_with_user_menu(master_id, counter):
     return inline_full
 
 
-def keyboard_with_user_partner_menu(master_id, counter):
-    inline_btn_1 = InlineKeyboardButton('Записаться', callback_data=f'ms_cont_{master_id}')
+def keyboard_with_user_partner_menu(master_id, counter, url_to_reviews, url_to_works, url_to_partner):
+    inline_btn_1 = InlineKeyboardButton('Записаться', callback_data=f'ms_cont_{master_id}', url='t.me/'+url_to_partner[1:])
     inline_btn_2 = InlineKeyboardButton('Работы мастера',
-                                        callback_data=f'ms_port_{master_id}')
-    inline_btn_3 = InlineKeyboardButton('Отзывы', callback_data=f'ms_reviews_{master_id}')
+                                        callback_data=f'ms_port_{master_id}', url=url_to_works)
+    inline_btn_3 = InlineKeyboardButton('Отзывы', callback_data=f'ms_reviews_{master_id}', url=url_to_reviews)
     inline_btn_4 = InlineKeyboardButton('Назад', callback_data='back_us_menu')
 
     row2 = [types.InlineKeyboardButton('⏪', callback_data=f'previous_partn_menu_'),
@@ -220,7 +220,7 @@ def menu_with_questionaries_search_by_city(is_active, counter, type, master_id):
     else:
         code = 'P'
 
-    inline_btn_1 = InlineKeyboardButton(f'Статус анкеты {active_status}', callback_data=f'acvF_{code}{master_id}')
+    inline_btn_1 = InlineKeyboardButton(f'Статус анкеты {active_status}', callback_data=f'acvF_{type}{master_id}')
     inline_btn_2 = InlineKeyboardButton('Поиск', callback_data=f'search_as_admin{code}')
     inline_btn_3 = InlineKeyboardButton('На главную', callback_data='back_menu')
 
@@ -247,4 +247,53 @@ def keyboard_with_master(master_id):
     inline_full.add(inline_btn_1)
     inline_full.add(inline_btn_2)
     inline_full.add(inline_btn_3)
+    return inline_full
+
+
+def keyboard_with_mailing_type_for_admin():
+    inline_btn_1 = InlineKeyboardButton('Рассылка с фото', callback_data='ad_ml_w_photo')
+    inline_btn_2 = InlineKeyboardButton('Рассылка без фото', callback_data='ad_ml_wiout_photo')
+
+    inline_full = types.InlineKeyboardMarkup()
+    inline_full.add(inline_btn_1)
+    inline_full.add(inline_btn_2)
+
+    return inline_full
+
+
+def keyboard_with_cities_for_admin_mailing():
+    keyboard = types.InlineKeyboardMarkup()
+
+    all_cities = get_all_cities()
+
+    for city in all_cities:
+        button = types.InlineKeyboardButton(text=city.capitalize(), callback_data=f"ad_ml_c{city}")
+        keyboard.add(button)
+
+    return keyboard
+
+
+def keyboard_with_districts_for_admin_mailing(city_name):
+    keyboard = types.InlineKeyboardMarkup()
+    button = types.InlineKeyboardButton(text='Все районы города', callback_data=f"ad_ml_dist_all")
+    keyboard.add(button)
+
+    count = 'ad_ml_c'
+    all_areas = get_all_areas_by_city_name(city_name[len(count):])
+
+    for area in all_areas:
+        button = types.InlineKeyboardButton(text=area, callback_data=f"ad_ml_dist_{area}")
+        keyboard.add(button)
+
+    return keyboard
+
+
+def keyboard_to_srart_mailing_for_amdin():
+    inline_btn_1 = InlineKeyboardButton('Запустить', callback_data='start_ml_ad')
+    inline_btn_2 = InlineKeyboardButton('Отменить', callback_data='return_to_admin_menu')
+
+    inline_full = types.InlineKeyboardMarkup()
+    inline_full.add(inline_btn_1)
+    inline_full.add(inline_btn_2)
+
     return inline_full

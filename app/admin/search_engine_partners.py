@@ -3,6 +3,7 @@ import traceback
 from sqlalchemy.orm import sessionmaker
 from telebot import types
 
+from beauty_bot.app.apps_tools.message_deleter import delete_previous_messages
 from beauty_bot.app.db_queries import set_master_active_profile
 from beauty_bot.extantions import bot
 from beauty_bot.app.keyboards import keyboard_with_cities_to_find_partners_profile, \
@@ -15,20 +16,14 @@ queries_to_db = QueriesToDb(Session)
 menu_with_partners = AdminMenuPartners(queries_to_db)
 
 
+@delete_previous_messages
 def send_cites_to_find_partners_profiles(call):
-    try:
-        bot.delete_message(call.message.chat.id, call.message.id)
-        bot.delete_message(call.message.chat.id, call.message.id - 1)
-        bot.delete_message(call.message.chat.id, call.message.id - 2)
-    except Exception:
-        pass
-
     bot.send_message(call.message.chat.id, 'Выберите город',
                      reply_markup=keyboard_with_cities_to_find_partners_profile())
 
 
+@delete_previous_messages
 def profiles_partners_by_city(call):
-    bot.delete_message(call.message.chat.id, call.message.id)
     menu_with_partners.selected_city_for_partners = call.data[3:]
 
     try:

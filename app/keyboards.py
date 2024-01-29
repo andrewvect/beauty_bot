@@ -105,7 +105,8 @@ def menu_with_questionaries(menu, type):
     if type == 'partners':
         code = 'P'
 
-    inline_btn_1 = InlineKeyboardButton(f'Статус анкеты {active_status}', callback_data=f'acv_{code}{menu.master_data["id"]}')
+    inline_btn_1 = InlineKeyboardButton(f'Статус анкеты {active_status}',
+                                        callback_data=f'acv_{code}{menu.master_data["id"]}')
     inline_btn_2 = InlineKeyboardButton('Поиск', callback_data=f'search_as_admin{code}')
     inline_btn_3 = InlineKeyboardButton('На главную', callback_data='back_menu')
 
@@ -213,9 +214,9 @@ def keyboard_with_user_partner_menu(master_id, counter, url_to_reviews, url_to_w
     return inline_full
 
 
-def menu_with_questionaries_search_by_city(is_active, counter, type, master_id):
+def menu_with_questionaries_search_by_city(menu, type):
     active_status = '✅'
-    if is_active is False:
+    if menu.master_data['is_active'] is False:
         active_status = '❌'
 
     if type == 'masters':
@@ -223,12 +224,13 @@ def menu_with_questionaries_search_by_city(is_active, counter, type, master_id):
     else:
         code = 'P'
 
-    inline_btn_1 = InlineKeyboardButton(f'Статус анкеты {active_status}', callback_data=f'acvF_{type}{master_id}')
+    inline_btn_1 = InlineKeyboardButton(f'Статус анкеты {active_status}',
+                                        callback_data=f'acvF_{type}{menu.masted_data["id"]}')
     inline_btn_2 = InlineKeyboardButton('Поиск', callback_data=f'search_as_admin{code}')
     inline_btn_3 = InlineKeyboardButton('На главную', callback_data='back_menu')
 
     row2 = [types.InlineKeyboardButton('⏪', callback_data=f'ad_f_previous_{type}'),
-            types.InlineKeyboardButton(f'{counter}', callback_data='__'),
+            types.InlineKeyboardButton(f'{menu.count_numbers()}', callback_data='__'),
             types.InlineKeyboardButton('⏩', callback_data=f'ad_f_next_{type}')]
 
     inline_full = types.InlineKeyboardMarkup(row_width=3)

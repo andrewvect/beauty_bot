@@ -11,6 +11,7 @@ def get_last_message_id(chat_id):
 
 
 def send_menu_with_questionarties_by_type(message, description, url_to_photo, user_id, master_tg_username):
+
     if user_id in user_state:
         menu = user_state[user_id]['masters']
     else:
@@ -31,9 +32,4 @@ def send_menu_with_questionarties_by_type(message, description, url_to_photo, us
         bot.send_photo(user_id,
                        caption=message_text,
                        photo=photo,
-                       reply_markup=keyboard_with_user_menu(menu.master_data['id'],
-                                                            menu.count_numbers(),
-                                                            menu.master_data['reviews_url'],
-                                                            menu.master_data['master_portfolio_url'],
-                                                            menu.master_data['telegram_user_name'],
-                                                            menu.master_data['location_id']))
+                       reply_markup=keyboard_with_user_menu(menu))

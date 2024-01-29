@@ -1,8 +1,6 @@
-import traceback
-
 from sqlalchemy.orm import sessionmaker
-from telebot import types
 
+from beauty_bot.app.admin.tools import send_menu_with_photo, edit_message
 from beauty_bot.app.apps_tools.message_deleter import delete_previous_messages
 from beauty_bot.app.db_queries import set_master_active_profile
 from beauty_bot.extantions import bot
@@ -36,37 +34,14 @@ def profiles_masters_by_city(call):
 
 def send_menu_with_master_questionaries(call, state):
     menu_with_masters.get_data_for_questionary()
-    data = menu_with_masters.master_data
 
     if state == 'new':
-        with open(f"beauty_bot/app/photos/{data['url_to_photo']}.jpg", 'rb') as photo:
-            bot.send_photo(chat_id=call.message.chat.id, photo=photo,
-                           reply_markup=menu_with_questionaries_search_by_city(data['is_active'],
-                                                                               menu_with_masters.count_numbers(),
-                                                                               'M',
-                                                                               data['id']),
-                           caption=menu_with_masters.get_description())
+        send_menu_with_photo(call, 'M', menu_with_masters,
+                             menu_with_questionaries_search_by_city(menu_with_masters, 'M'), menu_with_masters.get_description())
 
     if state == 'old':
-        try:
-            with open(f"beauty_bot/app/photos/{data['url_to_photo']}.jpg", 'rb') as photo:
-                bot.edit_message_media(media=types.InputMedia(type='photo', media=photo),
-                                       chat_id=call.message.chat.id,
-                                       message_id=call.message.id,
-                                       reply_markup=menu_with_questionaries_search_by_city(data['is_active'],
-                                                                                           menu_with_masters.count_numbers(),
-                                                                                           'M',
-                                                                                           data['id']))
-
-                bot.edit_message_caption(caption=menu_with_masters.get_description(),
-                                         chat_id=call.message.chat.id,
-                                         message_id=call.message.id,
-                                         reply_markup=menu_with_questionaries_search_by_city(data['is_active'],
-                                                                                             menu_with_masters.count_numbers(),
-                                                                                             'M',
-                                                                                             data['id']))
-        except Exception:
-            print(traceback.print_exc())
+        edit_message(call, menu_with_masters, menu_with_questionaries_search_by_city(menu_with_masters, 'M'),
+                     menu_with_masters.get_description(), 'M')
 
 
 def next_page_admin_master_menu_by_city(call):

@@ -94,9 +94,9 @@ def keyboard_with_master_types():
     return inline_full
 
 
-def menu_with_questionaries(is_active, counter, type, master_id):
+def menu_with_questionaries(menu, type):
     active_status = '✅'
-    if is_active is False:
+    if menu.master_data['is_active'] is False:
         active_status = '❌'
 
     code = None
@@ -104,14 +104,13 @@ def menu_with_questionaries(is_active, counter, type, master_id):
         code = 'M'
     if type == 'partners':
         code = 'P'
-    print(f'acv_{code}{master_id}')
 
-    inline_btn_1 = InlineKeyboardButton(f'Статус анкеты {active_status}', callback_data=f'acv_{code}{master_id}')
+    inline_btn_1 = InlineKeyboardButton(f'Статус анкеты {active_status}', callback_data=f'acv_{code}{menu.master_data["id"]}')
     inline_btn_2 = InlineKeyboardButton('Поиск', callback_data=f'search_as_admin{code}')
     inline_btn_3 = InlineKeyboardButton('На главную', callback_data='back_menu')
 
     row2 = [types.InlineKeyboardButton('⏪', callback_data=f'ad_previous_page_{type}'),
-            types.InlineKeyboardButton(f'{counter}', callback_data='__'),
+            types.InlineKeyboardButton(f'{menu.count_numbers()}', callback_data='__'),
             types.InlineKeyboardButton('⏩', callback_data=f'ad_next_page_{type}')]
 
     inline_full = types.InlineKeyboardMarkup(row_width=3)

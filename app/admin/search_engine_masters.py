@@ -2,9 +2,12 @@ import traceback
 
 from sqlalchemy.orm import sessionmaker
 from telebot import types
+
+from beauty_bot.app.apps_tools.message_deleter import delete_previous_messages
 from beauty_bot.app.db_queries import set_master_active_profile
 from beauty_bot.extantions import bot
-from beauty_bot.app.keyboards import keyboard_with_cities_to_find_masters_profile, menu_with_questionaries_search_by_city
+from beauty_bot.app.keyboards import keyboard_with_cities_to_find_masters_profile, \
+    menu_with_questionaries_search_by_city
 from beauty_bot.app.models import engine
 from beauty_bot.app.tools import QueriesToDb, AdminMenuMasters
 
@@ -13,20 +16,14 @@ queries_to_db = QueriesToDb(Session)
 menu_with_masters = AdminMenuMasters(queries_to_db)
 
 
+@delete_previous_messages
 def send_cites_to_find_masters_profiles(call):
-    try:
-        bot.delete_message(call.message.chat.id, call.message.id)
-        bot.delete_message(call.message.chat.id, call.message.id - 1)
-        bot.delete_message(call.message.chat.id, call.message.id - 2)
-    except Exception:
-        pass
-
     bot.send_message(call.message.chat.id, 'Выберите город',
                      reply_markup=keyboard_with_cities_to_find_masters_profile())
 
 
+@delete_previous_messages
 def profiles_masters_by_city(call):
-    bot.delete_message(call.message.chat.id, call.message.id)
     menu_with_masters.selected_city_for_masters = call.data[3:]
 
     try:

@@ -1,5 +1,5 @@
 import telebot
 
-from beauty_bot.app.config import bot_key
+from beauty_bot.app.config import CONFIG
 
-bot = telebot.TeleBot(bot_key)
+bot = telebot.TeleBot(CONFIG.bot_key)

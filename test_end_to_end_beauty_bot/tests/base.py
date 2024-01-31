@@ -8,6 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from test2 import clear_data
+from beauty_bot.test_end_to_end_beauty_bot.config import TEST_CONFIG
 
 
 class BaseTestSetUp(unittest.TestCase):
@@ -22,9 +23,9 @@ class BaseTestSetUp(unittest.TestCase):
         cls.bot_process.terminate()
 
     def setUp(self) -> None:
-        self.bot_name_to_test = '@test_beauty_kwork_bot'
-        api_id = '29540942'
-        api_hash = '839f0fe913ae2fd2f22cd2ed0e8cbbae'
+        self.bot_name_to_test = TEST_CONFIG.bot_name_tg
+        api_id = TEST_CONFIG.api_id
+        api_hash = TEST_CONFIG.api_hash
         self.client = Client('my_account', api_id, api_hash)
 
         database_path = 'sqlite:///beauty_bot.db'

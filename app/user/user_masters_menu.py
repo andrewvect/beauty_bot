@@ -11,7 +11,6 @@ user_state = {}
 
 
 def next_page_user_menu(call):
-    print(user_state)
     menu = user_state[call.message.chat.id]['masters']
     menu.up_page()
 
@@ -38,7 +37,6 @@ def subscribe_on_master(message, referral_link):
 
 
 def send_menu_with_questionarties_by_type(message, type, state):
-    print(user_state)
     if message.chat.id in user_state:
         menu = user_state[message.chat.id][type]
     else:
@@ -56,12 +54,7 @@ def send_menu_with_questionarties_by_type(message, type, state):
             bot.send_photo(message.chat.id,
                            caption=message_text,
                            photo=photo,
-                           reply_markup=keyboard_with_user_menu(menu.master_data['id'],
-                                                                menu.count_numbers(),
-                                                                menu.master_data['reviews_url'],
-                                                                menu.master_data['master_portfolio_url'],
-                                                                menu.master_data['telegram_user_name'],
-                                                                menu.master_data['location_id']))
+                           reply_markup=keyboard_with_user_menu(menu))
 
     if state == 'old':
         try:
@@ -69,20 +62,10 @@ def send_menu_with_questionarties_by_type(message, type, state):
                 bot.edit_message_media(media=types.InputMedia(type='photo', media=photo),
                                        chat_id=message.chat.id,
                                        message_id=message.id,
-                                       reply_markup=keyboard_with_user_menu(menu.master_data['id'],
-                                                                            menu.count_numbers(),
-                                                                            menu.master_data['reviews_url'],
-                                                                            menu.master_data['master_portfolio_url'],
-                                                                            menu.master_data['telegram_user_name'],
-                                                                            menu.master_data['location_id']))
+                                       reply_markup=keyboard_with_user_menu(menu))
 
                 bot.edit_message_caption(caption=message_text, chat_id=message.chat.id, message_id=message.id,
-                                         reply_markup=keyboard_with_user_menu(menu.master_data['id'],
-                                                                              menu.count_numbers(),
-                                                                              menu.master_data['reviews_url'],
-                                                                              menu.master_data['master_portfolio_url'],
-                                                                              menu.master_data['telegram_user_name'],
-                                                                              menu.master_data['location_id']))
+                                         reply_markup=keyboard_with_user_menu(menu))
         except Exception:
             print(traceback.print_exc())
 

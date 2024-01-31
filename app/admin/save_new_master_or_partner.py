@@ -1,13 +1,11 @@
-# save new master questionnaire
-import traceback
-
+from beauty_bot.app.admin.tools import create_message_with_successful_save_new_master
+from beauty_bot.app.apps_tools.file_saver import save_image_and_get_path
 from beauty_bot.app.apps_tools.message_deleter import delete_previous_messages
 from beauty_bot.app.config import CONFIG
 from beauty_bot.app.db_queries import get_area_id_by_name, add_new_master
 from beauty_bot.extantions import bot
 from beauty_bot.app.keyboards import keyboard_with_towns_to_save_new_master, keyboard_with_areas_to_save_new_master, \
     admin_keyboard2, keyboard_with_master_types
-from beauty_bot.app.logger import log_error
 from beauty_bot.app.services import generate_key
 
 new_master_state = {}
@@ -20,8 +18,7 @@ def process_choose_type_master(call):
 
 @delete_previous_messages
 def handle_master_type_click(call):
-    count = len('chose_type_')
-    if call.data[count:] == 'partner':
+    if call.data[len('chose_type_'):] == 'partner':
         new_master_state['is_partner'] = True
     else:
         new_master_state['is_partner'] = False
@@ -42,32 +39,16 @@ def process_new_master_username_step(message):
     bot.register_next_step_handler(message, process_new_master_photo_step)
 
 
+@delete_previous_messages
 def process_new_master_photo_step(message):
-    try:
+    file_name = save_image_and_get_path(message, bot)
 
-        photo = message.photo[-1]
-        file_id = photo.file_id
+    new_master_state['file_name'] = file_name[:-3]
 
-        file_info = bot.get_file(file_id)
-        file_path = file_info.file_path
+    bot.edit_message_text(chat_id=message.chat.id, message_id=message.id - 2,
+                          text="Отправьте телеграмм ссылку на анкету в виде @telgram_username")
 
-        downloaded_file = bot.download_file(file_path)
-
-        file_name = generate_key(7)
-
-        with open(f'beauty_bot/app/photos/{file_name}.jpg', 'wb') as new_file:
-            new_file.write(downloaded_file)
-
-        new_master_state['file_name'] = file_name
-        bot.delete_message(message.chat.id, message.id)
-
-        bot.edit_message_text(chat_id=message.chat.id, message_id=message.id - 2,
-                              text="Отправьте телеграмм ссылку на анкету в виде @telgram_username")
-
-        bot.register_next_step_handler(message, process_master_telegram_id)
-    except Exception as e:
-        log_error(e)
-        bot.send_message(message.chat.id, "Ошибка обработки комманды")
+    bot.register_next_step_handler(message, process_master_telegram_id)
 
 
 @delete_previous_messages
@@ -99,9 +80,9 @@ def process_portfolio_url(message):
 
     bot.register_next_step_handler(message, process_new_master_description)
 
+
 @delete_previous_messages
 def process_new_master_description(message):
-
     new_master_state['description'] = message.text
 
     bot.edit_message_text(chat_id=message.chat.id, message_id=message.id - 6,
@@ -109,9 +90,9 @@ def process_new_master_description(message):
 
     bot.send_message(message.chat.id, "Доступные города", reply_markup=keyboard_with_towns_to_save_new_master())
 
+
 @delete_previous_messages
 def handle_save_new_master_town(call):
-
     new_master_state['town'] = call.data
 
     bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.id - 7,
@@ -120,33 +101,28 @@ def handle_save_new_master_town(call):
     bot.send_message(call.message.chat.id, "Доступные районы выбраного города",
                      reply_markup=keyboard_with_areas_to_save_new_master(call.data))
 
+
 @delete_previous_messages
 def handle_save_new_master(call):
-
     new_master_state['area'] = call.data[len('save_new_master_area_'):]
     area_id = get_area_id_by_name(new_master_state['area'])
 
     api_key = generate_key(10)
     referal_key = generate_key(10)
 
-    add_new_master(new_master_state['telegram_username'],
+    add_new_master(new_master_state,
                    api_key,
                    referal_key,
-                   new_master_state['description'],
-                   new_master_state['username'],
-                   new_master_state['file_name'],
-                   new_master_state['is_partner'],
                    True,
-                   area_id,
-                   new_master_state['reviews_url'],
-                   new_master_state['portfolio_url']
+                   area_id
                    )
 
-    value = 'мастера'
-    if new_master_state['is_partner']:
-        value = 'партнера'
+    bot.send_message(call.message.chat.id,
+                     create_message_with_successful_save_new_master(new_master_state,
+                                                                    api_key,
+                                                                    referal_key,
+                                                                    CONFIG))
 
-    bot.send_message(call.message.chat.id, f"Анкета {value} {new_master_state['username']} создана!\n"
-                                           f"Api key: {api_key} \n"
-                                           f"Referal link: https://t.me/{CONFIG.bot_name_tg[1:]}?start={referal_key}")
-    bot.send_message(call.message.chat.id, "Меню админа", reply_markup=admin_keyboard2())
+    bot.send_message(call.message.chat.id,
+                     "Меню админа",
+                     reply_markup=admin_keyboard2())

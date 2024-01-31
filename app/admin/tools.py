@@ -11,8 +11,20 @@ def send_menu_with_photo(call, type, menu, keyboard, message):
                        reply_markup=keyboard(menu, type))
 
 
-def edit_message(call, menu, keyboard, message, type):
+def create_message_with_successful_save_new_master(master_state, api_key, referal_key, CONFIG) -> str:
 
+    if master_state['is_partner']:
+        value = 'партнера'
+    else:
+        value = 'мастера'
+
+    message = f"Анкета {value} {master_state['username']} создана!\n"
+    f"Api key: {api_key} \n"
+    f"Referal link: https://t.me/{CONFIG.bot_name_tg[1:]}?start={referal_key}"
+    return message
+
+
+def edit_message(call, menu, keyboard, message, type):
     edit_menu_with_photo(call, type, menu, keyboard)
     edit_message_caption(call, menu, keyboard, message, type)
 

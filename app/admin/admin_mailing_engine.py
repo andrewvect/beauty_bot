@@ -1,12 +1,9 @@
 from sqlalchemy.orm import sessionmaker
-
 from beauty_bot.app.apps_tools.message_deleter import delete_previous_messages
 from beauty_bot.extantions import bot
 from beauty_bot.app.keyboards import keyboard_with_mailing_type_for_admin, keyboard_with_cities_for_admin_mailing, \
     keyboard_with_districts_for_admin_mailing, keyboard_to_srart_mailing_for_amdin, admin_keyboard2
-from beauty_bot.app.logger import log_error
 from beauty_bot.app.models import engine
-from beauty_bot.app.services import generate_key
 from beauty_bot.app.tools import QueriesToDb, MailingEngine
 from beauty_bot.app.apps_tools.file_saver import save_image_and_get_path
 
@@ -39,9 +36,7 @@ def process_answer_for_new_mailing_without_photo_as_admin(call) -> None:
 @delete_previous_messages
 def process_save_photo_for_new_mailing(message) -> None:
 
-    image_path = save_image_and_get_path(message, bot)
-
-    mailing.url_to_photo = image_path
+    mailing.url_to_photo = save_image_and_get_path(message, bot)
 
     bot.send_message(message.chat.id, "Пришлите описание для рассылки")
 

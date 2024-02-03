@@ -1,5 +1,3 @@
-import traceback
-
 from ..apps_tools.message_deleter import delete_previous_messages
 from ..db_queries import check_if_city_exist, add_new_city
 from beauty_bot.extantions import bot

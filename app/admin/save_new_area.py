@@ -3,6 +3,8 @@ from beauty_bot.app.db_queries import get_city_id_by_name, check_if_area_exist, 
 from beauty_bot.extantions import bot
 from beauty_bot.app.keyboards import admin_keyboard2, keyboard_with_towns
 
+selected_area = ''
+
 
 @delete_previous_messages
 def process_ckeck_city(message):
@@ -19,9 +21,9 @@ def handle_button3_click(call):
 
 @delete_previous_messages
 def handle_save_area_town(call):
-
     city_id = get_city_id_by_name(call.data[5:])
 
+    global selected_area
     if check_if_area_exist(selected_area, city_id):
         bot.send_message(call.message.chat.id,
                          f'Район "{selected_area.capitalize()}" уже существует в городе "{call.data[5:].capitalize()}"')

@@ -85,7 +85,8 @@ def process_portfolio_url(message):
 def process_new_master_description(message):
     new_master_state['description'] = message.text
 
-    bot.edit_message_text(chat_id=message.chat.id, message_id=message.id - 6,
+    bot.edit_message_text(chat_id=message.chat.id,
+                          message_id=message.id - 6,
                           text="Выберите город для анкеты")
 
     bot.send_message(message.chat.id, "Доступные города", reply_markup=keyboard_with_towns_to_save_new_master())
@@ -105,7 +106,6 @@ def handle_save_new_master_town(call):
 @delete_previous_messages
 def handle_save_new_master(call):
     new_master_state['area'] = call.data[len('save_new_master_area_'):]
-    area_id = get_area_id_by_name(new_master_state['area'])
 
     api_key = generate_key(10)
     referal_key = generate_key(10)
@@ -114,7 +114,7 @@ def handle_save_new_master(call):
                    api_key,
                    referal_key,
                    True,
-                   area_id
+                   get_area_id_by_name(new_master_state['area'])
                    )
 
     bot.send_message(call.message.chat.id,

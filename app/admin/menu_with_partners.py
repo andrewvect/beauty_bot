@@ -29,8 +29,7 @@ def previous_page_partners_admin_menu(call):
 
 def change_partner_visibility(call):
 
-    master_id = call.data[len('acv_') + 1:]
-    set_master_active_profile(master_id)
+    set_master_active_profile(master_id=call.data[len('acv_') + 1:])
 
     send_menu_with_questionaries(call, 'partners', 'old', menu_with_partners)
 

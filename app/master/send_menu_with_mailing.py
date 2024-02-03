@@ -6,11 +6,7 @@ from beauty_bot.app.user.user_masters_menu import user_state
 from beauty_bot.extantions import bot
 
 
-def get_last_message_id(chat_id):
-    message = bot.send_message('привет', chat_id)
-
-
-def send_menu_with_questionarties_by_type(message, description, url_to_photo, user_id, master_tg_username):
+def send_menu_with_questionarties_by_type(master, user_id, master_tg_username) -> None:
 
     if user_id in user_state:
         menu = user_state[user_id]['masters']
@@ -22,13 +18,13 @@ def send_menu_with_questionarties_by_type(message, description, url_to_photo, us
     menu.move_number_to_first(master_id)
     menu.get_data_for_questionary()
 
-    if url_to_photo is None:
-        url_to_photo = menu.master_data['url_to_photo']
+    if master['url_to_photo']:
+        master['url_to_photo'] = menu.master_data['url_to_photo']
 
     message_text = f"Вам сообщение от {menu.master_data['username']} \n" \
-                   f"{description} \n"
+                   f"{master['description']} \n"
 
-    with open(f"beauty_bot/app/photos/{url_to_photo}.jpg", 'rb') as photo:
+    with open(f"beauty_bot/app/photos/{master['url_to_photo']}.jpg", 'rb') as photo:
         bot.send_photo(user_id,
                        caption=message_text,
                        photo=photo,

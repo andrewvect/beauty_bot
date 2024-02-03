@@ -1,14 +1,10 @@
-import traceback
-
 from sqlalchemy.orm import sessionmaker
-from telebot import types
 
-from beauty_bot.app.admin.tools import send_menu_with_photo, edit_message
+from beauty_bot.app.admin.service import send_menu_by_type
 from beauty_bot.app.apps_tools.message_deleter import delete_previous_messages
 from beauty_bot.app.db_queries import set_master_active_profile
 from beauty_bot.extantions import bot
-from beauty_bot.app.keyboards import keyboard_with_cities_to_find_partners_profile, \
-    menu_with_questionaries_search_by_city
+from beauty_bot.app.keyboards import keyboard_with_cities_to_find_partners_profile
 from beauty_bot.app.models import engine
 from beauty_bot.app.tools import QueriesToDb, AdminMenuPartners
 
@@ -29,23 +25,17 @@ def profiles_partners_by_city(call):
 
     try:
         menu_with_partners.get_partners_ids_by_city_name()
-        send_menu_with_partners_questionaries(call, 'new')
     except Exception:
-
         bot.send_message(call.message.chat.id, 'В выбранном городе еще нет анкет.')
         send_cites_to_find_partners_profiles(call)
+    else:
+        send_menu_with_partners_questionaries(call, 'new')
 
 
 def send_menu_with_partners_questionaries(call, state):
     menu_with_partners.get_data_for_questionary()
 
-    if state == 'new':
-        send_menu_with_photo(call, 'P', menu_with_partners, menu_with_questionaries_search_by_city,
-                             menu_with_partners.get_description())
-
-    if state == 'old':
-        edit_message(call, menu_with_partners, menu_with_questionaries_search_by_city,
-                     menu_with_partners.get_description(), 'P')
+    send_menu_by_type(call, state, 'P', menu_with_partners)
 
 
 def next_page_admin_partner_menu_by_city(call):

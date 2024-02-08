@@ -1,7 +1,8 @@
 from sqlalchemy.orm import sessionmaker
 from beauty_bot.app.admin.service import send_menu_by_type
+from beauty_bot.app.apps_tools.menu_utils.admin_menu_utils import next_page_admin_menu, previous_page_admin_menu, \
+    change_visibility
 from beauty_bot.app.apps_tools.message_deleter import delete_previous_messages
-from beauty_bot.app.db_queries import set_master_active_profile
 from beauty_bot.extantions import bot
 from beauty_bot.app.keyboards import keyboard_with_cities_to_find_masters_profile
 from beauty_bot.app.models import engine
@@ -38,18 +39,12 @@ def send_menu_with_master_questionaries(call, state):
 
 
 def next_page_admin_master_menu_by_city(call):
-    menu_with_masters.up_page()
-
-    send_menu_with_master_questionaries(call, 'old')
+    next_page_admin_menu(call, menu_with_masters)
 
 
 def previous_page_admin_master_menu_by_city(call):
-    menu_with_masters.down_page()
-
-    send_menu_with_master_questionaries(call, 'old')
+    previous_page_admin_menu(call, menu_with_masters)
 
 
 def change_master_visibility_in_find_menu(call):
-    set_master_active_profile(master_id=call.data[len('acvF_') + 1:])
-
-    send_menu_with_master_questionaries(call, 'old')
+    change_visibility(call, 'masters', menu_with_masters)

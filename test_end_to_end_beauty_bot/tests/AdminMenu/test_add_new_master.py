@@ -53,7 +53,7 @@ class TestAdminPanel(BaseTestSetUp):
 
             self.assertEqual(last_response.text, 'Пришлите фото для анкеты мастера')
 
-            photo_path = 'photos/1.jpg'
+            photo_path = '../photos/1.jpg'
 
             self.client.send_photo(chat_id=self.bot_name_to_test, photo=photo_path)
             time.sleep(1)

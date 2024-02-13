@@ -1,4 +1,4 @@
-from beauty_bot.app.services import generate_key
+from beauty_bot.app.app_tools.services import generate_key
 
 
 def save_image_and_get_path(message, bot) -> str:

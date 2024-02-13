@@ -1,13 +1,13 @@
 from telebot import types
 from telebot.types import InlineKeyboardButton
 
-from db_queries import get_all_cities, get_all_areas_by_city_name
+from beauty_bot.app.app_tools.db_queries import db
 
 
 def keyboard_with_towns():
     keyboard = types.InlineKeyboardMarkup()
 
-    all_cities = get_all_cities()
+    all_cities = db.get_all_cities()
 
     for city in all_cities:
         button = types.InlineKeyboardButton(text=city.capitalize(), callback_data=f"town_{city}")
@@ -19,7 +19,7 @@ def keyboard_with_towns():
 def keyboard_with_cities_to_find_masters_profile():
     keyboard = types.InlineKeyboardMarkup()
 
-    all_cities = get_all_cities()
+    all_cities = db.get_all_cities()
 
     for city in all_cities:
         button = types.InlineKeyboardButton(text=city, callback_data=f"fM_{city}")
@@ -31,7 +31,7 @@ def keyboard_with_cities_to_find_masters_profile():
 def keyboard_with_cities_to_find_partners_profile():
     keyboard = types.InlineKeyboardMarkup()
 
-    all_cities = get_all_cities()
+    all_cities = db.get_all_cities()
 
     for city in all_cities:
         button = types.InlineKeyboardButton(text=city, callback_data=f"fP_{city}")
@@ -43,7 +43,7 @@ def keyboard_with_cities_to_find_partners_profile():
 def keyboard_with_areas_to_save_new_master(city_name):
     keyboard = types.InlineKeyboardMarkup()
     count = 'save_new_master_area_'
-    all_areas = get_all_areas_by_city_name(city_name[len(count):])
+    all_areas = db.get_all_areas_by_city_name(city_name[len(count):])
 
     for area in all_areas:
         button = types.InlineKeyboardButton(text=area, callback_data=f"save_new_master_area_{area}")
@@ -54,7 +54,7 @@ def keyboard_with_areas_to_save_new_master(city_name):
 
 def keyboard_with_towns_to_save_new_master():
     keyboard = types.InlineKeyboardMarkup()
-    all_cities = get_all_cities()
+    all_cities = db.get_all_cities()
 
     for city in all_cities:
         button = types.InlineKeyboardButton(text=city, callback_data=f"save_new_master_town_{city}")
@@ -126,7 +126,7 @@ def menu_with_questionaries(menu, type):
 def keyboard_with_towns_to_search():
     keyboard = types.InlineKeyboardMarkup()
 
-    all_cities = get_all_cities()
+    all_cities = db.get_all_cities()
 
     for city in all_cities:
         button = types.InlineKeyboardButton(text=city, callback_data=f"town_{city}")
@@ -269,7 +269,7 @@ def keyboard_with_mailing_type_for_admin():
 def keyboard_with_cities_for_admin_mailing():
     keyboard = types.InlineKeyboardMarkup()
 
-    all_cities = get_all_cities()
+    all_cities = db.get_all_cities()
 
     for city in all_cities:
         button = types.InlineKeyboardButton(text=city.capitalize(), callback_data=f"ad_ml_c{city}")
@@ -284,7 +284,7 @@ def keyboard_with_districts_for_admin_mailing(city_name):
     keyboard.add(button)
 
     count = 'ad_ml_c'
-    all_areas = get_all_areas_by_city_name(city_name[len(count):])
+    all_areas = db.get_all_areas_by_city_name(city_name[len(count):])
 
     for area in all_areas:
         button = types.InlineKeyboardButton(text=area, callback_data=f"ad_ml_dist_{area}")
@@ -302,3 +302,15 @@ def keyboard_to_srart_mailing_for_amdin():
     inline_full.add(inline_btn_2)
 
     return inline_full
+
+
+class AdminKeyboards:
+    pass
+
+
+class UserKeyboards:
+    pass
+
+
+class MasterKeyboards:
+    pass

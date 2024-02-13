@@ -1,16 +1,11 @@
-from sqlalchemy.orm import sessionmaker
-from beauty_bot.app.apps_tools.message_deleter import delete_previous_messages
+from beauty_bot.app.app_tools.message_deleter import delete_previous_messages
 from beauty_bot.extantions import bot
-from beauty_bot.app.keyboards import keyboard_with_mailing_type_for_admin, keyboard_with_cities_for_admin_mailing, \
+from beauty_bot.app.app_tools.keyboards.keyboards import keyboard_with_mailing_type_for_admin, keyboard_with_cities_for_admin_mailing, \
     keyboard_with_districts_for_admin_mailing, keyboard_to_srart_mailing_for_amdin, admin_keyboard2
-from beauty_bot.app.models import engine
-from beauty_bot.app.tools import QueriesToDb, MailingEngine
-from beauty_bot.app.apps_tools.file_saver import save_image_and_get_path
+from beauty_bot.app.app_tools.db_queries import db
+from beauty_bot.app.app_tools.file_saver import save_image_and_get_path
 
-Session = sessionmaker(bind=engine)
-
-queries_to_db = QueriesToDb(Session)
-mailing = MailingEngine(queries_to_db)
+mailing = MailingEngine(db)
 
 
 @delete_previous_messages

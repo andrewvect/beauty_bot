@@ -1,17 +1,13 @@
-from sqlalchemy.orm import sessionmaker
-
 from beauty_bot.app.admin.service import send_menu_by_type
-from beauty_bot.app.apps_tools.menu_utils.admin_menu_utils import next_page_admin_menu, previous_page_admin_menu, \
+from beauty_bot.app.app_tools.db_queries import db
+from beauty_bot.app.app_tools.menu_utils.admin_menu_utils import next_page_admin_menu, previous_page_admin_menu, \
     change_visibility
-from beauty_bot.app.apps_tools.message_deleter import delete_previous_messages
+from beauty_bot.app.app_tools.message_deleter import delete_previous_messages
 from beauty_bot.extantions import bot
-from beauty_bot.app.keyboards import keyboard_with_cities_to_find_partners_profile
-from beauty_bot.app.models import engine
-from beauty_bot.app.tools import QueriesToDb, AdminMenuPartners
+from beauty_bot.app.app_tools.keyboards.keyboards import keyboard_with_cities_to_find_partners_profile
+from beauty_bot.app.app_tools.tools import AdminMenuPartners
 
-Session = sessionmaker(bind=engine)
-queries_to_db = QueriesToDb(Session)
-menu_with_partners = AdminMenuPartners(queries_to_db)
+menu_with_partners = AdminMenuPartners(db)
 
 
 @delete_previous_messages

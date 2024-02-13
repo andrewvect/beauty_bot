@@ -1,12 +1,13 @@
 from beauty_bot.app.admin.tools import create_message_with_successful_save_new_master
-from beauty_bot.app.apps_tools.file_saver import save_image_and_get_path
-from beauty_bot.app.apps_tools.message_deleter import delete_previous_messages
+from beauty_bot.app.app_tools.file_saver import save_image_and_get_path
+from beauty_bot.app.app_tools.message_deleter import delete_previous_messages
 from beauty_bot.app.config import CONFIG
-from beauty_bot.app.db_queries import get_area_id_by_name, add_new_master
+from beauty_bot.app.app_tools.db_queries import db
 from beauty_bot.extantions import bot
-from beauty_bot.app.keyboards import keyboard_with_towns_to_save_new_master, keyboard_with_areas_to_save_new_master, \
+from beauty_bot.app.app_tools.keyboards.keyboards import keyboard_with_towns_to_save_new_master, \
+    keyboard_with_areas_to_save_new_master, \
     admin_keyboard2, keyboard_with_master_types
-from beauty_bot.app.services import generate_key
+from beauty_bot.app.app_tools.services import generate_key
 
 new_master_state = {}
 
@@ -110,12 +111,12 @@ def handle_save_new_master(call):
     api_key = generate_key(10)
     referal_key = generate_key(10)
 
-    add_new_master(new_master_state,
-                   api_key,
-                   referal_key,
-                   True,
-                   get_area_id_by_name(new_master_state['area'])
-                   )
+    db.add_new_master(new_master_state,
+                      api_key,
+                      referal_key,
+                      True,
+                      db.get_area_id_by_name(new_master_state['area'])
+                      )
 
     bot.send_message(call.message.chat.id,
                      create_message_with_successful_save_new_master(new_master_state,

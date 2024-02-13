@@ -1,7 +1,6 @@
-
-from beauty_bot.app.keyboards import keyboard_with_user_menu
-from beauty_bot.app.services import queries_to_db
-from beauty_bot.app.tools import MenuWithQuestionnairesEngine
+from beauty_bot.app.app_tools.db_queries import db
+from beauty_bot.app.app_tools.keyboards.keyboards import keyboard_with_user_menu
+from beauty_bot.app.app_tools.tools import MenuWithQuestionnairesEngine
 from beauty_bot.app.user.user_masters_menu import user_state
 from beauty_bot.extantions import bot
 
@@ -11,10 +10,10 @@ def send_menu_with_questionarties_by_type(master, user_id, master_tg_username) -
     if user_id in user_state:
         menu = user_state[user_id]['masters']
     else:
-        menu = MenuWithQuestionnairesEngine(queries_to_db, user_id)
+        menu = MenuWithQuestionnairesEngine(db, user_id)
         user_state[user_id] = {'masters': menu}
 
-    master_id = queries_to_db.get_master_id_by_telegram_user_name(master_tg_username)
+    master_id = db.get_master_id_by_telegram_user_name(master_tg_username)
     menu.move_number_to_first(master_id)
     menu.get_data_for_questionary()
 

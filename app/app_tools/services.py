@@ -1,17 +1,6 @@
 import string
 import random
-
-from sqlalchemy.orm import sessionmaker
-
-from models import engine
-from beauty_bot.app.tools import QueriesToDb
-
 import secrets
-
-selected_area = ''
-Session = sessionmaker(bind=engine)
-
-queries_to_db = QueriesToDb(Session)
 
 
 def generate_10_digit_key():

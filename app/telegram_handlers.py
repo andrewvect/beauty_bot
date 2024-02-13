@@ -1,14 +1,15 @@
 
 import traceback
 
+from beauty_bot.app.admin.admin_common_buttons import back_to_admin_menu_from_questionaries, admin_logout
 from beauty_bot.app.admin.admin_mailing_engine import process_answer_for_new_admin_mailing_with_photo, \
     send_keyboard_with_mailing_type_for_admin, \
     process_answer_for_new_mailing_without_photo_as_admin, start_mailing_as_admin, \
     process_save_city_for_new_mailing_as_admin, process_save_area_for_new_mailing_as_admin
 from beauty_bot.app.admin.menu_with_masters import \
-     send_menu_with_masters, back_to_admin_menu_from_questionaries, \
+     send_menu_with_masters, \
      next_page_masters_admin_menu, previous_page_masters_admin_menu,  \
-     admin_logout, change_master_visibility
+     change_master_visibility
 from beauty_bot.app.admin.menu_with_partners import send_menu_with_partners, next_page_partners_admin_menu, \
     previous_page_partners_admin_menu, change_partner_visibility
 from beauty_bot.app.admin.save_new_area import handle_button3_click, handle_save_area_town
@@ -18,8 +19,8 @@ from beauty_bot.app.admin.save_new_master_or_partner import process_choose_type_
 from beauty_bot.app.admin.search_engine_partners import change_partner_visibility_in_find_menu, \
     send_cites_to_find_partners_profiles, profiles_partners_by_city, next_page_admin_partner_menu_by_city, \
     previous_page_admin_partner_menu_by_city
-from beauty_bot.app.db_queries import add_user_to_database
-from beauty_bot.app.keyboards import admin_keyboard2
+from beauty_bot.app.app_tools.db_queries import add_user_to_database
+from beauty_bot.app.app_tools.keyboards.keyboards import admin_keyboard2
 from beauty_bot.app.master.master_menu import check_master_key, send_keyboard_with_master_menu, \
     send_keyboard_with_mailing_type, process_answer_for_new_mailing_with_photo, \
     process_answer_for_new_mailing_without_photo, start_mailing
@@ -29,10 +30,10 @@ from beauty_bot.app.admin.search_engine_masters import profiles_masters_by_city,
     change_master_visibility_in_find_menu, next_page_admin_master_menu_by_city, previous_page_admin_master_menu_by_city
 from beauty_bot.app.user.user_partners_menu import process_partners_menu, previous_page_user_partners_menu, \
     next_page_user_partners_menu
-from services import is_login_command
-from config import admin_key
+from beauty_bot.app.app_tools.services import is_login_command
+from config import CONFIG
 from beauty_bot.extantions import bot
-from logger import log_error
+from beauty_bot.app.app_tools.logger.logger import log_error
 
 admin_id = []
 
@@ -66,7 +67,7 @@ def handle_start(message):
 def handle_start(message):
     try:
         message_text = message.text.lower().split()
-        if message_text[1] == admin_key:
+        if message_text[1] == CONFIG.admin_key:
             if message.chat.id in admin_id:
                 pass
             else:
@@ -87,7 +88,6 @@ def handle_start(message):
 
 @bot.callback_query_handler(func=lambda call: True)
 def handle_button_click(call):
-    print(call.data)
     try:
         if call.data.startswith('type_'):
             process_choose_type_master(call)

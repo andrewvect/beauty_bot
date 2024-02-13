@@ -1,7 +1,7 @@
 from base import BaseTools
 
 
-class TestAdminPanel(BaseTools):
+class TestAdminPanelToAddNewCity(BaseTools):
 
     def process_add_new_city_as_admin(self):
 

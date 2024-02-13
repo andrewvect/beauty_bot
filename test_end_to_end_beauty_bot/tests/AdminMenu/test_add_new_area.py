@@ -1,89 +1,54 @@
 import time
 
-from base import BaseTestSetUp
+from base import BaseTools
+from beauty_bot.app.tests.fixtures import add_test_data_to_db
 
 
-class TestAdminPanel(BaseTestSetUp):
+class TestAdminPanel(BaseTools):
 
-    def process_add_new_city_as_admin(self):
-        # add_test_data_to_db(self.session)
+    def process_add_new_area_as_admin(self):
+        add_test_data_to_db(self.session)
 
-        with self.client:
-            # log as admin to menu
-            chat = self.client.get_chat(self.bot_name_to_test)
+        response_from_bot = self.send_message_to_bot_and_get_reply('/login 1')
 
-            message_to_log_as_admin = '/login 1'
-            self.client.send_message(self.bot_name_to_test, message_to_log_as_admin)
-            time.sleep(1)
+        self.assertEqual(response_from_bot.text, 'Меню админа:')
 
-            responses = self.client.get_chat_history(chat.id, limit=1)
-            last_response = next(responses)
+        self.push_button(response_from_bot, "button3")
 
-            self.assertEqual(last_response.text, 'Меню админа:')
-
-            # push button choose city
-
-            try:
-                self.client.request_callback_answer(chat.id, last_response.id, "button3", timeout=1)
-            except TimeoutError:
-                pass
-
-            responses = self.client.get_chat_history(chat.id, limit=1)
-            last_response = next(responses)
-
-            self.assertEqual(last_response.text, 'Напишите название района города:')
-
-
+        self.assertEqual(self.get_response_from_bot().text, 'Напишите название района города:')
 
     def test_add_new_district(self):
-        self.process_add_new_city_as_admin()
-        with self.client:
-            # send City name
-            message_city_name = 'Приморский'
-            self.client.send_message(self.bot_name_to_test, message_city_name)
-            time.sleep(1)
+        self.process_add_new_area_as_admin()
 
-            chat = self.client.get_chat(self.bot_name_to_test)
+        reply = self.send_message_to_bot_and_get_reply('Приморский')
 
-            responses = self.client.get_chat_history(chat.id, limit=2)
-            last_response = next(responses)
+        self.assertEqual(reply.text, 'Доступные города')
 
-            self.assertEqual(last_response.text, 'Доступные города')
-            time.sleep(1)
+        self.push_button(reply, "town_City1")
 
-            try:
-                self.client.request_callback_answer(chat.id, last_response.id, "town_City1", timeout=1)
-            except TimeoutError:
-                pass
+        reply1 = self.get_response_from_bot(1)
+        reply2 = self.get_response_from_bot(2)
 
-            responses = self.client.get_chat_history(chat.id, limit=2)
-            last_response = next(responses)
-            last_response2 = next(responses)
+        self.assertEqual(reply1.text, 'Меню админа')
+        self.assertEqual(reply2.text, 'Район "Приморский" успешно добавлен для города "City1"')
 
-            self.assertEqual(last_response2.text, 'Район "Приморский" успешно добавлен для города "City1"')
+        self.push_button(reply1, "logout")
 
     def test_cant_add_same_district(self):
-        self.process_add_new_city_as_admin()
-        with self.client:
-            # send Area name
-            message_area_name = 'Area1'
-            self.client.send_message(self.bot_name_to_test, message_area_name)
-            time.sleep(1)
+        self.process_add_new_area_as_admin()
 
-            chat = self.client.get_chat(self.bot_name_to_test)
+        reply = self.send_message_to_bot_and_get_reply('area1')
 
-            responses = self.client.get_chat_history(chat.id, limit=2)
-            last_response = next(responses)
+        self.assertEqual(reply.text, 'Доступные города')
 
-            self.assertEqual(last_response.text, 'Доступные города')
+        self.push_button(reply, "town_City1")
 
-            try:
-                self.client.request_callback_answer(chat.id, last_response.id, "town_city1", timeout=1)
-            except TimeoutError:
-                pass
+        reply1 = self.get_response_from_bot(1)
+        reply2 = self.get_response_from_bot(2)
 
-            responses = self.client.get_chat_history(chat.id, limit=2)
-            last_response = next(responses)
-            last_response2 = next(responses)
+        self.assertEqual(reply1.text, 'Меню админа')
+        self.assertEqual(reply2.text, 'Район "Area1" уже существует в городе "City1"')
 
-            self.assertEqual(last_response2.text, f'Район "{message_area_name}" уже существует в городе "City1"')
+        self.push_button(reply1, "logout")
+
+

@@ -5,7 +5,6 @@ import unittest
 from pyrogram import Client
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from test2 import clear_data
 from beauty_bot.test_end_to_end_beauty_bot.config import TEST_CONFIG
 
 
@@ -67,4 +66,11 @@ class BaseTools(BaseTestSetUp):
 
     def send_message_to_bot_and_get_reply(self, message) -> object:
         self.send_message(message)
+        time.sleep(1)
         return self.get_response_from_bot()
+
+    def send_photo_to_bot(self, photo_path) -> None:
+        with self.client:
+            chat = self.client.get_chat(self.bot_name_to_test)
+            self.client.send_photo(chat.id, photo_path)
+            time.sleep(1)

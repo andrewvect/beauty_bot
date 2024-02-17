@@ -1,4 +1,4 @@
-from ..app_tools.message_deleter import delete_previous_messages
+from beauty_bot.app.app_tools.message_deleter import delete_previous_messages
 from beauty_bot.app.app_tools.db_queries import db
 from beauty_bot.extantions import bot
 from beauty_bot.app.app_tools.keyboards.keyboards import admin_keyboard2

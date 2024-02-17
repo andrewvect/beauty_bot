@@ -1,12 +1,10 @@
-from beauty_bot.app.admin.tools import create_message_with_successful_save_new_master
+from beauty_bot.app.scenarios_by_role.admin.tools import create_message_with_successful_save_new_master
 from beauty_bot.app.app_tools.file_saver import save_image_and_get_path
 from beauty_bot.app.app_tools.message_deleter import delete_previous_messages
 from beauty_bot.app.config import CONFIG
 from beauty_bot.app.app_tools.db_queries import db
 from beauty_bot.extantions import bot
-from beauty_bot.app.app_tools.keyboards.keyboards import keyboard_with_towns_to_save_new_master, \
-    keyboard_with_areas_to_save_new_master, \
-    admin_keyboard2, keyboard_with_master_types
+from beauty_bot.app.app_tools.keyboards.AdminKeyboards import admin_keyboards
 from beauty_bot.app.app_tools.services import generate_key
 
 new_master_state = {}
@@ -14,7 +12,8 @@ new_master_state = {}
 
 @delete_previous_messages
 def process_choose_type_master(call):
-    bot.send_message(call.message.chat.id, "Выберите тип анкеты", reply_markup=keyboard_with_master_types())
+    bot.send_message(call.message.chat.id, "Выберите тип анкеты",
+                     reply_markup=admin_keyboards.keyboard_with_master_types())
 
 
 @delete_previous_messages
@@ -90,7 +89,8 @@ def process_new_master_description(message):
                           message_id=message.id - 6,
                           text="Выберите город для анкеты")
 
-    bot.send_message(message.chat.id, "Доступные города", reply_markup=keyboard_with_towns_to_save_new_master())
+    bot.send_message(message.chat.id, "Доступные города",
+                     reply_markup=admin_keyboards.keyboard_with_towns_to_save_new_master())
 
 
 @delete_previous_messages
@@ -101,7 +101,7 @@ def handle_save_new_master_town(call):
                           text="Выберите район для мастера")
 
     bot.send_message(call.message.chat.id, "Доступные районы выбраного города",
-                     reply_markup=keyboard_with_areas_to_save_new_master(call.data))
+                     reply_markup=admin_keyboards.keyboard_with_areas_to_save_new_master(call.data))
 
 
 @delete_previous_messages
@@ -126,4 +126,4 @@ def handle_save_new_master(call):
 
     bot.send_message(call.message.chat.id,
                      "Меню админа",
-                     reply_markup=admin_keyboard2())
+                     reply_markup=admin_keyboards.admin_keyboard2())

@@ -1,17 +1,11 @@
-from sqlalchemy.orm import sessionmaker
-from beauty_bot.app.apps_tools.file_saver import save_image_and_get_path
-from beauty_bot.app.apps_tools.message_deleter import delete_previous_messages
-from beauty_bot.app.db_queries import get_master_photo_name_by_telegram_username, \
-    get_all_master_subscribers_by_master_telegram_username, get_key_by_telegram_username
-from beauty_bot.app.master.send_menu_with_mailing import send_menu_with_questionarties_by_type
-from beauty_bot.app.models import engine
-from beauty_bot.app.tools import QueriesToDb
+from beauty_bot.app.app_tools.file_saver import save_image_and_get_path
+from beauty_bot.app.app_tools.message_deleter import delete_previous_messages
+from beauty_bot.app.app_tools.db_queries import db
+from beauty_bot.app.scenarios_by_role.master.send_menu_with_mailing import send_menu_with_questionarties_by_type
 from beauty_bot.extantions import bot
-from beauty_bot.app.keyboards import keyboard_master_menu, keyboard_to_srart_mailing, keyboard_with_mailing_type
+from beauty_bot.app.app_tools.keyboards.keyboards import keyboard_master_menu, keyboard_to_srart_mailing, keyboard_with_mailing_type
 
 new_masters_mailing_state = dict()
-Session = sessionmaker(bind=engine)
-queries_to_db = QueriesToDb(Session)
 
 
 @delete_previous_messages
@@ -58,7 +52,7 @@ def process_save_description_for_new_mailing(message) -> None:
                    f"Контакт: @{message.from_user.username}"
 
     if len(new_masters_mailing_state[message.chat.id]) == 1:
-        photo_master_from_db = get_master_photo_name_by_telegram_username('@' + message.chat.username)
+        photo_master_from_db = db.get_master_photo_name_by_telegram_username('@' + message.chat.username)
         new_masters_mailing_state[message.chat.id]['photo'] = photo_master_from_db
 
     with open(f"beauty_bot/app/photos/{new_masters_mailing_state[message.chat.id]['photo'] + '.jpg'}",
@@ -70,12 +64,12 @@ def process_save_description_for_new_mailing(message) -> None:
 
 @delete_previous_messages
 def start_mailing(call) -> None:
-    subscribers_telegram_ids = get_all_master_subscribers_by_master_telegram_username(call.message.chat.username)
+    subscribers_telegram_ids = db.get_all_master_subscribers_by_master_telegram_username(call.message.chat.username)
 
     if not subscribers_telegram_ids:
         bot.send_message(call.message.chat.id, "У вас еще нет подписчиков")
 
-    if not queries_to_db.check_master_visability(call.message.chat.username):
+    if not db.check_master_visability(call.message.chat.username):
         return bot.send_message(call.message.chat.id, 'Ваша анкета сейчас не активна, расслыка не возможна')
 
     else:
@@ -83,18 +77,17 @@ def start_mailing(call) -> None:
         bot.send_message(call.message.chat.id, "Рассылка запущена")
 
         for user_id in subscribers_telegram_ids:
-            send_menu_with_questionarties_by_type(call.message,
-                                                  new_masters_mailing_state[call.message.chat.id]['description'],
-                                                  new_masters_mailing_state[call.message.chat.id]['photo'],
-                                                  user_id,
-                                                  call.message.chat.username)
+            send_menu_with_questionarties_by_type(
+                new_masters_mailing_state[call.message.chat.id],
+                user_id,
+                call.message.chat.username)
 
     bot.send_message(call.message.chat.id, "Личный кабинет мастера 🧑:", reply_markup=keyboard_master_menu())
 
 
 # authorisation as master
 def check_master_key(user_name, key):
-    user_key = get_key_by_telegram_username('@' + user_name)
+    user_key = db.get_key_by_telegram_username('@' + user_name)
     if user_key.lower() == key:
         return True
     return False

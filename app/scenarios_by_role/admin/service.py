@@ -1,4 +1,4 @@
-from beauty_bot.app.admin.tools import send_menu_with_photo, edit_message
+from beauty_bot.app.scenarios_by_role.admin.tools import send_menu_with_photo, edit_message
 from beauty_bot.extantions import bot
 from beauty_bot.app.app_tools.keyboards.keyboards import menu_with_questionaries, admin_keyboard2, menu_with_questionaries_search_by_city
 

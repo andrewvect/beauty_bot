@@ -2,10 +2,10 @@ import traceback
 
 from telebot import types
 
+from beauty_bot.app.scenarios_by_role.admin import queries_to_db
 from beauty_bot.extantions import bot
-from beauty_bot.app.keyboards import keyboard_with_user_menu
-from beauty_bot.app.services import queries_to_db
-from beauty_bot.app.tools import MenuWithQuestionnairesEngine
+from beauty_bot.app.app_tools.keyboards.keyboards import keyboard_with_user_menu
+from beauty_bot.app.app_tools.mailing_engine import MenuWithQuestionnairesEngine
 
 user_state = {}
 

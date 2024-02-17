@@ -1,11 +1,11 @@
-from beauty_bot.app.admin.service import send_menu_by_type
+from beauty_bot.app.scenarios_by_role.admin.service import send_menu_by_type
 from beauty_bot.app.app_tools.db_queries import db
 from beauty_bot.app.app_tools.menu_utils.admin_menu_utils import next_page_admin_menu, previous_page_admin_menu, \
     change_visibility
 from beauty_bot.app.app_tools.message_deleter import delete_previous_messages
 from beauty_bot.extantions import bot
-from beauty_bot.app.app_tools.keyboards.keyboards import keyboard_with_cities_to_find_partners_profile
-from beauty_bot.app.app_tools.tools import AdminMenuPartners
+from beauty_bot.app.app_tools.keyboards.AdminKeyboards import admin_keyboards
+from beauty_bot.app.app_tools.mailing_engine import AdminMenuPartners
 
 menu_with_partners = AdminMenuPartners(db)
 
@@ -13,7 +13,7 @@ menu_with_partners = AdminMenuPartners(db)
 @delete_previous_messages
 def send_cites_to_find_partners_profiles(call) -> None:
     bot.send_message(call.message.chat.id, 'Выберите город',
-                     reply_markup=keyboard_with_cities_to_find_partners_profile())
+                     reply_markup=admin_keyboards.keyboard_with_cities_to_find_partners_profile())
 
 
 @delete_previous_messages

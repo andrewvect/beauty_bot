@@ -1,7 +1,7 @@
 from beauty_bot.app.app_tools.message_deleter import delete_previous_messages
 from beauty_bot.app.app_tools.db_queries import db
 from beauty_bot.extantions import bot
-from beauty_bot.app.app_tools.keyboards.keyboards import admin_keyboard2, keyboard_with_towns
+from beauty_bot.app.app_tools.keyboards.AdminKeyboards import admin_keyboards
 
 selected_area = ''
 
@@ -11,7 +11,7 @@ def process_ckeck_city(message):
     global selected_area
     selected_area = message.text.lower()
 
-    bot.send_message(message.chat.id, "Доступные города", reply_markup=keyboard_with_towns())
+    bot.send_message(message.chat.id, "Доступные города", reply_markup=admin_keyboards.keyboard_with_towns())
 
 
 @delete_previous_messages
@@ -33,4 +33,4 @@ def handle_save_area_town(call):
         bot.send_message(call.message.chat.id,
                          f'Район "{selected_area.capitalize()}" успешно добавлен для города "{call.data[5:].capitalize()}"')
 
-    bot.send_message(call.message.chat.id, "Меню админа", reply_markup=admin_keyboard2())
+    bot.send_message(call.message.chat.id, "Меню админа", reply_markup=admin_keyboards.admin_keyboard2())

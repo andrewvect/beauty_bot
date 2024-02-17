@@ -1,7 +1,7 @@
 from beauty_bot.app.app_tools.db_queries import db
 from beauty_bot.app.app_tools.keyboards.keyboards import keyboard_with_user_menu
-from beauty_bot.app.app_tools.tools import MenuWithQuestionnairesEngine
-from beauty_bot.app.user.user_masters_menu import user_state
+from beauty_bot.app.app_tools.mailing_engine import MenuWithQuestionnairesEngine
+from beauty_bot.app.scenarios_by_role.user.user_masters_menu import user_state
 from beauty_bot.extantions import bot
 
 

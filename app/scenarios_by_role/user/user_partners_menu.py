@@ -4,10 +4,10 @@ from sqlalchemy.orm import sessionmaker
 from telebot import types
 
 from beauty_bot.extantions import bot
-from beauty_bot.app.keyboards import keyboard_with_user_partner_menu
+from beauty_bot.app.app_tools.keyboards.keyboards import keyboard_with_user_partner_menu
 from beauty_bot.app.models import engine
-from beauty_bot.app.tools import MenuWithPartnersQuestionnaires, QueriesToDb
-from beauty_bot.app.user.user_masters_menu import send_menu_with_questionarties_masters
+from beauty_bot.app.app_tools.mailing_engine import MenuWithPartnersQuestionnaires, QueriesToDb
+from beauty_bot.app.scenarios_by_role.user.user_masters_menu import send_menu_with_questionarties_masters
 
 user_state = {}
 Session = sessionmaker(bind=engine)

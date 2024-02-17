@@ -1,6 +1,6 @@
+from beauty_bot.app.app_tools.menu.AdminMenu import AdminMenuPartners
 from beauty_bot.app.app_tools.menu_utils.admin_menu_utils import send_menu_with_items, next_page_admin_menu, \
     previous_page_admin_menu, change_visibility
-from beauty_bot.app.app_tools.mailing_engine import AdminMenuPartners
 from beauty_bot.app.app_tools.db_queries import db
 
 menu_with_partners = AdminMenuPartners(db)

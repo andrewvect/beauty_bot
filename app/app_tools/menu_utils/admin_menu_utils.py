@@ -1,6 +1,6 @@
 # menu_utils.py
-from beauty_bot.app.admin.service import send_menu_with_questionaries
-from beauty_bot.app.app_tools.db_queries import set_master_active_profile
+from beauty_bot.app.scenarios_by_role.admin import send_menu_with_questionaries
+from beauty_bot.app.app_tools.db_queries import db
 
 
 def send_menu_with_items(call, menu_type, menu_instance):
@@ -19,5 +19,5 @@ def previous_page_admin_menu(call, menu_instance):
 
 
 def change_visibility(call, menu_type, menu_instance):
-    set_master_active_profile(master_id=call.data[len('acv_') + 1:])
+    db.set_master_active_profile(master_id=call.data[len('acv_') + 1:])
     send_menu_with_questionaries(call, menu_type, 'old', menu_instance)

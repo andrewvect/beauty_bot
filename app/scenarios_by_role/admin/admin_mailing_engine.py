@@ -1,3 +1,4 @@
+from beauty_bot.app.app_tools.mailing_engine import MailingEngine
 from beauty_bot.app.app_tools.message_deleter import delete_previous_messages
 from beauty_bot.extantions import bot
 from beauty_bot.app.app_tools.keyboards.AdminKeyboards import admin_keyboards
